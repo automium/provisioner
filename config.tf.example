@@ -1,0 +1,26 @@
+# generic config
+
+variable "quantity" {}
+variable "name" {}
+variable "consul" {}
+variable "consul_port" {}
+variable "consul_encrypt" {}
+variable "consul_datacenter" {}
+
+# service config
+
+variable "cluster_name" {}
+variable "master" {}
+variable "node" {}
+variable "etcd" {}
+
+# openstack config
+
+variable "flavor" {}
+variable "keypair_name" {}
+variable "network_name" {}
+variable "region" {}
+variable "auth_url" {}
+variable "tenant_name" {}
+variable "user_name" {}
+variable "password" {}
