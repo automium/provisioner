@@ -13,29 +13,29 @@ write_files:
                 client_addr: 0.0.0.0
                 node_name: "{{ ansible_hostname }}"
                 data_dir: "{{ consul_data_dir }}"
-                encrypt: "${consul_encrypt}"
-                datacenter: "${consul_datacenter}"
+                encrypt: "{{ lookup('env','consul_encrypt') }}"
+                datacenter: "{{ lookup('env','consul_datacenter') }}"
                 enable_syslog: true
                 server: false
                 ui: true
                 enable_script_checks: true
                 services:
-                  - name: "${name}"
-                  - name: "${name}-etcd"
+                  - name: "{{ lookup('env','name') }}"
+                  - name: "{{ lookup('env','name') }}-etcd"
                     check:
                       - tcp: "localhost:2379"
                         interval: "2s"
-                  - name: "${name}-kube-master"
+                  - name: "{{ lookup('env','name') }}-kube-master"
                     check:
                       - tcp: "localhost:6443"
                         interval: "2s"
-                  - name: "${name}-kube-node"
+                  - name: "{{ lookup('env','name') }}-kube-node"
                     check:
                       - tcp: "localhost:10250"
                         interval: "2s"
                 rejoin_after_leave: true
                 retry_join:
-                  - "${consul}"
+                  - "{{ lookup('env','consul') }}"
         tasks:
           - service: name=consul state=restarted
     path: /usr/src/cloud/playbook.yml
@@ -44,6 +44,21 @@ write_files:
 runcmd:
   - |
       bash <<'EOF'
+      # Define all config file as bash vars
+      wget https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 -O /usr/local/bin/json2hcl
+      chmod +x /usr/local/bin/json2hcl
+      eval $(
+      cat << EOC | json2hcl -reverse | jq -r '.variable[] | keys[] as $k | "export \($k)=\(.[$k][].default)"'
+      ${config}
+      EOC
+      )
+
+      if [ "$cluster_name" ]; then
+        export name=$${cluster_name}-$${name}
+      fi
+
+      export number=${number}
+
       # Run main playbook
       export COMPLETED=false
       while [ "$COMPLETED" == "false" ]; do
@@ -105,12 +120,7 @@ runcmd:
 
           mkdir callback_plugins
           pip install -r requirements.txt
-          apt-get install bc -y
-          export COUNT=${number}
-          export NCOUNT=$(echo "$COUNT+1" | bc)
-          export ANSIBLE_CONSUL_SERVER=${consul}
-          export ANSIBLE_CONSUL_PATH="kubernetes/${name}/ansiblesync"
-          #ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml --limit node$NCOUNT -e ansible_python_interpreter=/usr/bin/python --connection=local
+          #ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml --limit $${name}-$${number} -e ansible_python_interpreter=/usr/bin/python --connection=local
 
         ) >> /var/log/cloud-scripts.log 2>&1
         if [ $? == 0 ]; then
