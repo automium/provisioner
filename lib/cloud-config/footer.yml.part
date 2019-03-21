@@ -1,0 +1,49 @@
+    path: /usr/src/cloud/playbook.yml
+    permissions: '0400'
+
+runcmd:
+  - |
+      bash <<'EOF'
+      # Define all config file as bash vars
+      wget https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 -O /usr/local/bin/json2hcl
+      chmod +x /usr/local/bin/json2hcl
+      eval $(
+      cat << EOC | json2hcl -reverse | jq -r '.variable[] | keys[] as $k | "export \($k)=\(.[$k][].default)"'
+      ${config}
+      EOC
+      )
+
+      if [ "$cluster_name" ]; then
+        export name=$${cluster_name}-$${name}
+      else
+        export cluster_name=$${name}
+      fi
+
+      export number=${number}
+
+      export bootstrap_session=$(curl -s -X PUT "http://$${consul}:$${consul_port}/v1/session/create" | jq .ID | sed 's/"//g')
+      export bootstrap=$(curl -s -X PUT --data "{ name: $${name}-$${number}.node.$${consul_datacenter}.consul }" "http://$${consul}:$${consul_port}/v1/kv/kubernetes/$${cluster_name}/custom_bootstrap?acquire=$${bootstrap_session}")
+      if [ "$bootstrap" == "true" ]; then
+          echo 'im the bootstrap node'
+      fi
+
+      # Run main playbook
+      export COMPLETED=false
+      while [ "$COMPLETED" == "false" ]; do
+        (
+          cd /usr/src/cloud
+          source venv/bin/activate
+          export HOME=/root
+          if [ $bootstrap == "true" ]; then
+            ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags others
+          else
+            ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags bootstrap
+          fi
+        ) >> /var/log/cloud-scripts.log 2>&1
+        if [ $? == 0 ]; then
+          COMPLETED=true
+        fi
+        sleep 1
+      done
+      export COMPLETED=false
+      EOF

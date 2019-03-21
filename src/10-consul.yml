@@ -1,0 +1,83 @@
+- name: create consul check script
+  hosts: 127.0.0.1
+  pre_tasks:
+    - name: render consul_check.sh
+      set_fact:
+        consul_check_sh: |
+          #!/bin/bash
+          status="$(kubectl --kubeconfig /root/.kube/config get nodes {{ansible_hostname}} | awk 'NR > 1' | awk '{print $2}')"
+          echo $status
+          if [[ $status == "NotReady" ]]; then
+           echo "Node $HOSTNAME dead"
+           exit 1
+          elif [[ $status == "Ready" ]]; then
+           echo "Node is OK"
+           exit 0
+          else
+            echo not found
+            exit 1
+          fi
+    - name: create consul_check.sh
+      copy:
+        content: "{{ consul_check_sh }}"
+        dest: /opt/consul/chek_node.sh
+        owner: consul
+        group: consul
+        mode: 0500
+        backup: yes
+
+- name: consul agent
+  hosts: 127.0.0.1
+  pre_tasks:
+    - name: set false all var
+      set_fact:
+        etcd: false
+        master: false
+        node: false
+      set_fact:
+        etcd: "{{ lookup('env','etcd') }}"
+        master:  "{{ lookup('env','master') }}"
+        node: "{{ lookup('env','node') }}"
+    - name: render consul service
+      set_fact:
+        consul_template_render: |
+          - name: "{{ lookup('env','name') }}"
+          {% if etcd is sameas true %}
+          - name: "{{ lookup('env','name') }}-etcd"
+            checks:
+              - args: ["etcdctl", "--ca-file=/etc/ssl/etcd/ssl/ca.pem", "--cert-file=/etc/ssl/etcd/ssl/member-{{ ansible_hostname }}.pem", "--key-file=/etc/ssl/etcd/ssl/member-{{ ansible_hostname }}-key.pem", "--endpoint=https://127.0.0.1:2379", "cluster-health", "|", "grep", "{{ ansible_default_ipv4['address']  }}", "|", "grep", "healthy"]
+                interval: "10s"
+          {% endif %}
+          {% if master is sameas true %}
+          - name: "{{ lookup('env','name') }}-kube-master"
+            checks:
+              - args: ["/opt/consul/chek_node.sh"]
+                interval: "30s"
+          {% endif %}
+          {% if node is sameas true %}
+          - name: "{{ lookup('env','name') }}-kube-node"
+          {% endif %}
+    - name: convert from string to object
+      set_fact:
+        consul_template: "{{  consul_template_render | from_yaml }}"
+  roles:
+    - role: entercloudsuite.consul
+      consul_config_validate: "{{ consul_user_home }}/bin/consul validate -config-format=json %s"
+      consul_configs:
+        main:
+          bind_addr: "{{ ansible_default_ipv4['address'] }}"
+          client_addr: 0.0.0.0
+          node_name: "{{ ansible_hostname }}"
+          data_dir: "{{ consul_data_dir }}"
+          encrypt: "{{ lookup('env','consul_encrypt') }}"
+          datacenter: "{{ lookup('env','consul_datacenter') }}"
+          enable_syslog: true
+          server: false
+          ui: true
+          enable_script_checks: true
+          services: "{{consul_template}}"
+          rejoin_after_leave: true
+          retry_join:
+            - "{{ lookup('env','consul') }}"
+  tasks:
+    - service: name=consul state=restarted
