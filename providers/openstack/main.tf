@@ -19,7 +19,7 @@ module "internal" {
 module "kubernetes" {
   source = "github.com/automium/terraform-modules//openstack/instance?ref=master"
   name = "${var.cluster_name}-${var.name}"
-  region = "it-mil1"
+  region = "${var.region}"
   image = "ubuntu1604-master-10"
   quantity = "${var.quantity}"
   discovery = "false"
