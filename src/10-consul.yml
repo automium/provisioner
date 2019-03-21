@@ -1,0 +1,36 @@
+- name: prerequisite
+  hosts: 127.0.0.1
+  roles:
+    - role: entercloudsuite.consul
+      consul_config_validate: "{{ consul_user_home }}/bin/consul validate -config-format=json %s"
+      consul_configs:
+        main:
+          bind_addr: "{{ ansible_default_ipv4['address'] }}"
+          client_addr: 0.0.0.0
+          node_name: "{{ ansible_hostname }}"
+          data_dir: "{{ consul_data_dir }}"
+          encrypt: "{{ lookup('env','consul_encrypt') }}"
+          datacenter: "{{ lookup('env','consul_datacenter') }}"
+          enable_syslog: true
+          server: false
+          ui: true
+          enable_script_checks: true
+          services:
+            - name: "{{ lookup('env','name') }}"
+            - name: "{{ lookup('env','name') }}-etcd"
+              check:
+                - tcp: "localhost:2379"
+                  interval: "2s"
+            - name: "{{ lookup('env','name') }}-kube-master"
+              check:
+                - tcp: "localhost:6443"
+                  interval: "2s"
+            - name: "{{ lookup('env','name') }}-kube-node"
+              check:
+                - tcp: "localhost:10250"
+                  interval: "2s"
+          rejoin_after_leave: true
+          retry_join:
+            - "{{ lookup('env','consul') }}"
+  tasks:
+    - service: name=consul state=restarted
