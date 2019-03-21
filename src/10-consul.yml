@@ -20,7 +20,7 @@
     - name: create consul_check.sh
       copy:
         content: "{{ consul_check_sh }}"
-        dest: /opt/consul/chek_node.sh
+        dest: /opt/consul/check_node.sh
         owner: consul
         group: consul
         mode: 0500
@@ -51,7 +51,7 @@
           {% if master is sameas true %}
           - name: "{{ lookup('env','name') }}-kube-master"
             checks:
-              - args: ["/opt/consul/chek_node.sh"]
+              - args: ["/opt/consul/check_node.sh"]
                 interval: "30s"
           {% endif %}
           {% if node is sameas true %}
