@@ -20,10 +20,8 @@
     - name: create consul_check.sh
       copy:
         content: "{{ consul_check_sh }}"
-        dest: /opt/consul/check_node.sh
-        owner: consul
-        group: consul
-        mode: 0500
+        dest: /usr/local/bin/kubernetes_check_node
+        mode: 0555
         backup: yes
 
 - name: consul agent
@@ -51,7 +49,7 @@
           {% if master is sameas true %}
           - name: "{{ lookup('env','name') }}-kube-master"
             checks:
-              - args: ["/opt/consul/check_node.sh"]
+              - args: ["/usr/local/bin/kubernetes_check_node"]
                 interval: "30s"
           {% endif %}
           {% if node is sameas true %}
@@ -79,5 +77,5 @@
           rejoin_after_leave: true
           retry_join:
             - "{{ lookup('env','consul') }}"
-  tasks:
+  post_tasks:
     - service: name=consul state=restarted
