@@ -1,0 +1,15 @@
+- name: bootstrap end
+  hosts: 127.0.0.1
+  tags:
+    - bootstrap
+  tasks:
+    - name: report that bootstrap node have finished all the tasks
+      uri:
+        url: "http://{{ lookup('env','consul') }}:{{ lookup('env','consul_port') }}/v1/kv/kubernetes/{{ lookup('env','cluster_name') }}/custom_bootstrap_end"
+        method: PUT
+        status_code: 200
+        body: '{ "name": {{ ansible_hostname }}.node.{{ lookup("env","consul_datacenter") }}.consul }'
+      register: bootstrap_end
+      until: bootstrap_end.failed == false
+      delay: 1
+      retries: 6000
