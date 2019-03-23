@@ -14,11 +14,21 @@ data "local_file" "ssh-keys" {
   filename = "lib/cloud-config/ssh-keys.yml"
 }
 
+data "local_file" "others-wait" {
+  filename = "lib/cloud-config/others-wait.yml"
+}
+
+data "local_file" "bootstrap-end" {
+  filename = "lib/cloud-config/bootstrap-end.yml"
+}
+
 data "template_file" "cloud-config" {
   template = <<EOF
 ${data.local_file.header.content}
       ${indent(6,data.local_file.ssh-keys.content)}
+      ${indent(6,data.local_file.others-wait.content)}
       ${indent(6,data.external.cloud-config.result.output)}
+      ${indent(6,data.local_file.bootstrap-end.content)}
 ${data.local_file.footer.content}
 EOF
   count = "${var.quantity}"
