@@ -14,6 +14,14 @@ data "local_file" "provisioner" {
   filename = "lib/cloud-config/provisioner.yml"
 }
 
+data "local_file" "others-wait" {
+  filename = "lib/cloud-config/others-wait.yml"
+}
+
+data "local_file" "bootstrap-end" {
+  filename = "lib/cloud-config/bootstrap-end.yml"
+}
+
 data "template_file" "cloud-config" {
   template = <<EOF
 ${data.local_file.header.content}
