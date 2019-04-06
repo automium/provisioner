@@ -16,11 +16,11 @@ module "internal" {
   allow_remote = "${data.openstack_networking_subnet_v2.subnet.cidr}"
 }
 
-module "kubernetes" {
-  source = "github.com/automium/terraform-modules//openstack/instance?ref=master"
-  name = "${var.cluster_name}-${var.name}"
+module "instance" {
+  source = "github.com/jsecchiero/terraform-modules//openstack/instance?ref=master"
+  name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
   region = "${var.region}"
-  image = "ubuntu1604-master-10"
+  image = "ubuntu1604-master-11"
   quantity = "${var.quantity}"
   discovery = "false"
   flavor = "${var.flavor}"
