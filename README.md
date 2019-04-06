@@ -1,13 +1,12 @@
-# Kubernetes
+# Provisioner
 
-define playbook for distributed infrastracture using terraform, consul and ansible
+deploy ansible role in a distribuite manner on your favorite terraform provider
 
 ootb function:
 - ssh keys spread before deploy
 - bootstrap node election
 
 requirements:
-- consul
 - terraform
 - a prepared image that accept cloud init data
 - jq
@@ -18,8 +17,8 @@ requirements:
 clone this project
 
 ```
-git clone https://github.com/automium/kubernetes
-cd kubernetes
+git clone https://github.com/automium/provisioner
+cd provisioner
 ```
 
 copy config.tf.example to config.tf and edit it
@@ -27,10 +26,18 @@ copy config.tf.example to config.tf and edit it
 cp config.tf.example config.tf
 ```
 
-write your playbooks inside `src` folder for tasks that should run on all nodes (es src/50-main.yml)  
-the order of execution of the playbooks inside `src` are alphabetical  
-use tag with `bootstrap` label for task that must run one time on the leader (bootstrap) node  
-use tag with `others` label for task that must not run on leader node  
+`provisioner_role` and `provisioner_role_version` define which role and which version is used to be deployed
+
+then deploy it
+```
+terraform init providers/openstack
+terraform apply providers/openstack
+```
+
+## ansible role tags
+
+use tag with `bootstrap` in your ansible role for task that must run one time on the leader (bootstrap) node  
+use tag with `others` in your ansible role for task that must not run on leader node  
 access to the config.tf variables using `"{{ lookup('env','variable_x') }}"`
 ```
 - name: this task runs only on the bootstrap node
@@ -46,21 +53,4 @@ access to the config.tf variables using `"{{ lookup('env','variable_x') }}"`
   package: name=haproxy
   tags:
     - others
-```
-
-then deploy it
-```
-terraform init providers/openstack
-terraform apply providers/openstack
-```
-
-## troubleshoot
-
-export config values
-```
-eval $(cat config.tf | json2hcl -reverse | jq -r '.variable[] | keys[] as $k | "export \($k)=\(.[$k][].default)"')
-```
-and test the playbook
-```
-ansible-playbook src/50-main.yml
 ```

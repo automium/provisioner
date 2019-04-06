@@ -2,14 +2,16 @@
 
 variable "quantity" {}
 variable "name" {}
+variable "cluster_name" {}
 variable "consul" {}
-variable "consul_port" {}
+variable "consul_port" { default = "8500" }
 variable "consul_encrypt" {}
 variable "consul_datacenter" {}
 
 # service config
 
-variable "cluster_name" {}
+variable "provisioner_role" {}
+variable "provisioner_role_version" {}
 variable "master" {}
 variable "node" {}
 variable "etcd" {}

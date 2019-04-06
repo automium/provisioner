@@ -1,0 +1,5 @@
+- name: run provisioner
+  hosts: 127.0.0.1
+  roles:
+    - role: provisioner
+      consul_path: "{{ lookup('env', 'cluster_name') }}/{{ lookup('env', 'name') }}"
