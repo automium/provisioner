@@ -34,7 +34,7 @@ runcmd:
 
       # Setup ansible role provisioner requirement
       cd /usr/src/cloud
-      cat << EOG > provisioner_requirements.yml
+      cat << EOG > provisioner_requirement.yml
       - src: git+https://github.com/automium/ansible-provisioner.git
         version: master
         name: provisioner
@@ -47,7 +47,7 @@ runcmd:
           cd /usr/src/cloud
           source venv/bin/activate
           export HOME=/root
-          ansible-galaxy install -r provisioner_requirements.yml
+          ansible-galaxy install -r provisioner_requirement.yml
           if [ $bootstrap == "true" ]; then
             ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags others --extra-vars=$${config_json}
           else

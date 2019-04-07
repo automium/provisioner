@@ -1,6 +1,7 @@
 # generic config
 
 variable "quantity" {}
+variable "image" { default = "ubuntu1604-1.0.1-15" }
 variable "name" {}
 variable "cluster_name" {}
 variable "consul" {}
@@ -9,12 +10,10 @@ variable "consul_encrypt" {}
 variable "consul_datacenter" {}
 
 # service config
+# see project repo for more config to use
 
 variable "provisioner_role" {}
-variable "provisioner_role_version" {}
-variable "master" {}
-variable "node" {}
-variable "etcd" {}
+variable "provisioner_role_version" { default = "master" }
 
 # openstack config
 
