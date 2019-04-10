@@ -2,6 +2,10 @@
 
 set -x
 
+if [ $DEBUG == "true" ]; then
+  cat config.tf
+fi
+
 # Define all config file as bash vars
 eval $(
 cat << EOC | json2hcl -reverse | jq -r '.variable[] | keys[] as $k | "export \($k)=\(.[$k][].default)"'

@@ -1,0 +1,27 @@
+# generic config
+
+variable "quantity" { default = "${QUANTITY}" }
+variable "image" { default = "${IMAGE}" }
+variable "name" { default = "${NAME}" }
+variable "cluster_name" { default = "${CLUSTER_NAME}" }
+variable "consul" { default = "${CONSUL}" }
+variable "consul_port" { default = "${CONSUL_PORT}" }
+variable "consul_encrypt" { default = "${CONSUL_ENCRYPT}" }
+variable "consul_datacenter" { default = "${CONSUL_DATACENTER}" }
+
+# service config
+# see project repo for more config to use
+
+variable "provisioner_role" { default = "${PROVISIONER_ROLE}" }
+variable "provisioner_role_version" { default = "${PROVISIONER_ROLE_VERSION}" }
+
+# openstack config
+
+variable "flavor" { default = "${FLAVOR}" }
+variable "keypair_name" { default = "${KEYPAIR_NAME}" }
+variable "network_name" { default = "${OS_NETWORK_NAME}" }
+variable "region" { default = "${OS_REGION_NAME}" }
+variable "auth_url" { default = "${OS_AUTH_URL}" }
+variable "tenant_name" { default = "${OS_TENANT_NAME}" }
+variable "user_name" { default = "${OS_USERNAME}" }
+variable "password" { default = "${OS_PASSWORD}" }

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -x
+set -e
+
+source lib/init.sh
+
+terraform destroy -auto-approve providers/$PROVIDER

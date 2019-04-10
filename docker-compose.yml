@@ -1,0 +1,12 @@
+version: '3'
+services:
+  deploy:
+    image: automium\service-provisioner
+    container_name: automium-provisioner
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    env_file: 
+      - .env
+    network_mode: host

@@ -2,55 +2,42 @@
 
 deploy ansible role in a distribuite manner on your favorite terraform provider
 
-ootb function:
-- ssh keys spread before deploy
-- bootstrap node election
+the automium provisioner take care for two special tags for bootstrap your cluster
 
-requirements:
-- terraform
-- a prepared image that accept cloud init data
-- jq
-- json2hcl
+## Tags
+
+### bootstrap
+
+is used for task that must run one time on the leader (bootstrap) node. Es. initialize the cluster
+### others
+
+is used for task that must not run on leader node, but on the others nodes. Es. manage scale up of the cluster
+
+## Variables
+
+the variables are passed to the role using config.tf
 
 ## example
 
-clone this project
+create a .env file, see .env.example
 
-```
-git clone https://github.com/automium/provisioner
-cd provisioner
-```
-
-copy config.tf.example to config.tf and edit it
-```
-cp config.tf.example config.tf
-```
-
-`provisioner_role` and `provisioner_role_version` define which role and which version is used to be deployed
+`PROVISIONER_ROLE` and `PROVISIONER_ROLE_VERSION` define which role and which version is used to be deployed
 
 then deploy it
 ```
-terraform init providers/openstack
-terraform apply providers/openstack
+docker-compose run --rm deploy
 ```
 
-## ansible role tags
+## contribute
 
-use tag with `bootstrap` in your ansible role for task that must run one time on the leader (bootstrap) node  
-use tag with `others` in your ansible role for task that must not run on leader node  
-access to the config.tf variables using `"{{ lookup('env','variable_x') }}"`
+download the repo
 ```
-- name: this task runs only on the bootstrap node
-  package: name="{{ item }}"
-  with_items:
-    - "{{ lookup('env','package_for_bootstrap_node') }}"
-    - haproxy
-  tags:
-    - bootstrap
-- name: this task runs on all nodes in parallel
-  package: name=haproxy
-- name: this task runs only on other nodes (except for bootstrap node) in parallel
-  package: name=haproxy
-  tags:
-    - others
+git clone https://github.com/automium/provisioner.git
+cd provisioner
+```
+
+edit, build and test locally
+```
+docker-compose -f docker-compose.dev.yml build
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --rm deploy
 ```
