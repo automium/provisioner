@@ -1,6 +1,7 @@
 version: '3'
 services:
   deploy:
-    image: automiumservice-provisioner
+    container_name: automium-service-provisioner-dev
+    image: automium-service-provisioner-dev
     build:
       context: .

@@ -2,7 +2,7 @@
 
 set -x
 
-if [ $DEBUG == "true" ]; then
+if [ "$DEBUG" == "true" ]; then
   cat config.tf
 fi
 

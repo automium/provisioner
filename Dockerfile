@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get install jq -y
 
 # json2hcl
-RUN curl https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 -o /usr/local/bin/json2hcl && \
+RUN curl -L https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 -o /usr/local/bin/json2hcl && \
     chmod +x /usr/local/bin/json2hcl
 
 # openstack
