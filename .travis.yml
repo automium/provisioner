@@ -1,0 +1,12 @@
+---
+
+services:
+  - docker
+
+stages:
+  - build
+
+jobs:
+  include:
+    - stage: build
+      script: bash cicd/container.sh
