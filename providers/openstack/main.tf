@@ -17,7 +17,7 @@ module "internal" {
 }
 
 module "instance" {
-  source = "github.com/jsecchiero/terraform-modules//openstack/instance?ref=master"
+  source = "github.com/automium/terraform-modules//openstack/instance?ref=master"
   name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
   region = "${var.region}"
   image = "${var.image}"
