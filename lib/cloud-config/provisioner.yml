@@ -1,7 +1,8 @@
 - name: run provisioner
   hosts: 127.0.0.1
-  vars:
-    identity: "{{ lookup('env', 'identity') }}"
   roles:
     - role: provisioner
-      consul_path: "{{ cluster_name }}/{{ identity }}"
+      consul_path: "{{ lookup('env', 'consul_path') }}"
+      identity: "{{ lookup('env', 'identity') }}"
+      ssh_keys_enabled: "{{ lookup('env', 'ssh_keys_enabled') }}"
+      provisioner_role_enabled: "{{ lookup('env', 'provisioner_role_enabled') }}"

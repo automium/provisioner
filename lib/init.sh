@@ -1,8 +1,8 @@
 #!/bin/bash
 
-envsubst < config.tf.tmpl >> config.tf
+envsubst < config.tf.tmpl > config.tf
 
-if [ $DEBUG == "true" ]; then
+if [ "$DEBUG" == "true" ]; then
   cat config.tf
 fi
 

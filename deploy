@@ -5,4 +5,5 @@ set -e
 
 source lib/init.sh
 
-terraform apply -auto-approve providers/$PROVIDER
+terraform plan -out=plan.tfplan providers/$PROVIDER
+terraform apply -auto-approve plan.tfplan

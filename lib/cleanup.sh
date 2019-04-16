@@ -32,8 +32,16 @@ done
 
 if [ "$quantity" = "0" ]; then
   echo "is the last node so clean up everything"
-  # remove consul keys
+  # Remove consul keys
   curl -sS -X DELETE "http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}/$${identity}?recurse=yes"
+
+  # Cleanup all cluster if last group
+  cluster_group_exists=$(curl -H "Accept: application/json" -Ss http://10.2.0.61:8500/v1/kv/prova?recurse=yes | jq '.[].Key' | egrep ".*/.*/.*" > /dev/null && echo $?)
+    if [ "$cluster_group_exists" != "0" ]; then
+      echo "is the last group so clean up everything"
+      # Remove cluster consul keys
+      curl -sS -X DELETE "http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}?recurse=yes"
+    fi
 fi
 
 exit 0

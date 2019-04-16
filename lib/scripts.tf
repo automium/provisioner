@@ -6,8 +6,16 @@ data "local_file" "header" {
   filename = "lib/cloud-config/header.yml.part"
 }
 
+data "local_file" "mid" {
+  filename = "lib/cloud-config/mid.yml.part"
+}
+
 data "local_file" "footer" {
   filename = "lib/cloud-config/footer.yml.part"
+}
+
+data "local_file" "run" {
+  filename = "lib/cloud-config/run.sh"
 }
 
 data "local_file" "provisioner" {
@@ -18,6 +26,8 @@ data "template_file" "cloud-config" {
   template = <<EOF
 ${data.local_file.header.content}
       ${indent(6,data.local_file.provisioner.content)}
+${data.local_file.mid.content}
+      ${indent(6,data.local_file.run.content)}
 ${data.local_file.footer.content}
 EOF
   count = "${var.quantity}"
