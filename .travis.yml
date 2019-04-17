@@ -9,4 +9,4 @@ stages:
 jobs:
   include:
     - stage: build
-      script: bash cicd/container.sh
+      script: 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash cicd/container.sh; fi'

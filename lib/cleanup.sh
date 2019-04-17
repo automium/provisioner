@@ -36,12 +36,18 @@ if [ "$quantity" = "0" ]; then
   curl -sS -X DELETE "http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}/$${identity}?recurse=yes"
 
   # Cleanup all cluster if last group
-  cluster_group_exists=$(curl -H "Accept: application/json" -Ss http://10.2.0.61:8500/v1/kv/prova?recurse=yes | jq '.[].Key' | egrep ".*/.*/.*" > /dev/null && echo $?)
-    if [ "$cluster_group_exists" != "0" ]; then
-      echo "is the last group so clean up everything"
-      # Remove cluster consul keys
-      curl -sS -X DELETE "http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}?recurse=yes"
-    fi
+  cluster_group_kv=$(curl -H "Accept: application/json" -Ss http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}?recurse=yes)
+  if [ "$?" != "0" ]; then
+    echo curl error in cluster_group_kv
+    exit 1
+  fi
+
+  cluster_group_exists=$( echo ${cluster_group_kv} | jq '.[].Key' | egrep ".*/.*/.*" | wc -l)
+  if [ "$cluster_group_exists" != "0" ]; then
+    echo "is the last group so clean up everything"
+    # Remove cluster consul keys
+    curl -sS -X DELETE "http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}?recurse=yes"
+  fi
 fi
 
 exit 0
