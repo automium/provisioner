@@ -42,8 +42,8 @@ if [ "$quantity" = "0" ]; then
     exit 1
   fi
 
-  cluster_group_exists=$( echo ${cluster_group_kv} | jq '.[].Key' | egrep ".*/.*/.*" | wc -l)
-  if [ "$cluster_group_exists" != "0" ]; then
+  cluster_group_exists=$(echo $${cluster_group_kv} | jq '.[].Key' | egrep ".*/.*/.*" | wc -l)
+  if [ "$cluster_group_exists" = "0" ]; then
     echo "is the last group so clean up everything"
     # Remove cluster consul keys
     curl -sS -X DELETE "http://$${consul}:$${consul_port}/v1/kv/$${cluster_name}?recurse=yes"
