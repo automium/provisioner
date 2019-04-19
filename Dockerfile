@@ -8,10 +8,6 @@ RUN apt-get update && \
     unzip terraform.zip -d /usr/local/bin/ && \
     chmod +x /usr/local/bin/terraform
 
-# jq
-RUN apt-get update && \
-    apt-get install jq -y
-
 # json2hcl
 RUN curl -L https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 -o /usr/local/bin/json2hcl && \
     chmod +x /usr/local/bin/json2hcl
@@ -30,11 +26,11 @@ RUN curl -L $GOVC_LINK | gunzip > /usr/local/bin/govc && \
 RUN apt-get update && apt-get install python-pip -y && \
     pip install --user vcd-cli
 
+# tools
+RUN apt-get update && \
+    apt-get install jq bc gettext-base -y
 
-# TODO move in another part
-RUN apt install gettext-base -y
 ENV PATH=$PATH:/root/.local/bin/
-
 
 COPY . /usr/src/provisioner
 

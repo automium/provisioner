@@ -3,6 +3,7 @@
 set -x
 set -e
 
+export QUANTITY_CURRENT=${QUANTITY}
 source lib/init.sh
 
 terraform destroy -auto-approve providers/$PROVIDER

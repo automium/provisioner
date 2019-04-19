@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -x
+set -e
+
+# Import basic functions
+source lib/helpers.sh
+
+# Test that the upgrade works on a new node
+echo Test that the upgrade works on a new node
+QUANTITY=$(echo "$QUANTITY + 1" | bc)
+export QUANTITY
+source deploy
+
+# Workaround: cd into the providers directory to see state items
+cd providers/$PROVIDER
+ln -s ../../.terraform .
+cd ../..
+
+QUANTITY_TAINT=$(echo "$QUANTITY - 1" | bc)
+
+for n in $(seq 1 $QUANTITY_TAINT); do
+  NUMBER=$(echo "$n - 1" | bc)
+
+  cd providers/$PROVIDER
+
+  # Taint resource in instance $NUMBER
+  terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
+    RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
+    terraform taint -module=instance $RESOURCE.$NUMBER
+  done
+
+  # Recreate tainted instance $NUMBER
+  QUANTITY_CURRENT=$QUANTITY
+  export QUANTITY_CURRENT
+  cd ../..
+  source lib/apply.sh
+  source lib/init.sh
+
+  # TODO found a smart way to get the state change
+  sleep 10
+
+  # Wait until node is ready
+  wait_health_ok $IDENTITY-$NUMBER
+done
+
+# Decrease number to the orginal number
+echo Decrease quantity to the orginal number
+export QUANTITY=$QUANTITY_TAINT
+source deploy

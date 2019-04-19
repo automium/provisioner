@@ -3,7 +3,43 @@
 set -x
 set -e
 
-source lib/init.sh
+source lib/helpers.sh
 
-terraform plan -out=plan.tfplan providers/$PROVIDER
-terraform apply -auto-approve plan.tfplan
+while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
+
+  QUANTITY_CURRENT=$(get_current_quantity)
+
+  # The instance are increasing
+  INCREASE=false
+  if [ $QUANTITY_CURRENT -lt $QUANTITY ]; then
+    QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
+    INCREASE=true
+  fi
+
+  # The instance are decreasing
+  DECREASE=false
+  if [ $QUANTITY_CURRENT -gt $QUANTITY ]; then
+    QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
+    DECREASE=true
+  fi
+
+  # Change infrastructure
+  export QUANTITY_CURRENT
+  source lib/apply.sh
+
+  # Wait until consul quantity_current == get_current_quantity
+  while [ $(get_current_quantity) -ne ${QUANTITY_CURRENT} ]; do
+      echo "Wait until current quantity is increased"
+      sleep 10
+  done
+
+  # If going up
+  NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
+  if [ "$INCREASE" == "true" ]; then
+    # Wait until there is no issue in the node
+    wait_health_ok ${IDENTITY}-${NUMBER}
+  fi
+
+  sleep 10
+
+done
