@@ -1,45 +1,70 @@
-# Provisioner
+# provisioner
 
 deploy ansible role in a distribuite manner on your favorite terraform provider
 
 the automium provisioner take care for two special tags for bootstrap your cluster
 
-## Tags
+## variables
 
-### bootstrap
+TODO list the variables here
 
-is used for task that must run one time on the leader (bootstrap) node. Es. initialize the cluster
-### others
+## usage
 
-is used for task that must not run on leader node, but on the others nodes. Es. manage scale up of the cluster
+create a .env file, see [.env.example](https://raw.githubusercontent.com/automium/provisioner/master/.env.example) and download the composes
 
-## Variables
+```
+curl -Ss https://raw.githubusercontent.com/automium/provisioner/master/docker-compose.yml > docker-compose.yml
+curl -Ss https://raw.githubusercontent.com/automium/provisioner/master/docker-compose.dev.yml > docker-compose.dev.yml
+```
 
-the variables are passed to the role using config.tf
+### deploy
 
-## example
-
-create a .env file, see .env.example
-
-`PROVISIONER_ROLE` and `PROVISIONER_ROLE_VERSION` define which role and which version is used to be deployed
-
-then deploy it
 ```
 docker-compose pull
 docker-compose run --rm deploy
 ```
 
-## contribute
+### rolling upgrade
 
-download the repo
+```
+docker-compose pull
+docker-compose run --rm upgrade
+```
+
+### apply
+
+call terraform apply directly without waiting readiness
+
+```
+docker-compose pull
+docker-compose run --rm apply
+```
+
+### contribute
+
+download the repo and make your changes
+
 ```
 git clone https://github.com/automium/provisioner.git
 cd provisioner
 ```
 
 edit, build and test locally
+
 ```
 docker-compose pull
 docker-compose -f docker-compose.dev.yml build --no-cache --pull
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --rm deploy
 ```
+
+## tags
+
+TODO better explain the tags workflow
+
+### bootstrap
+
+is used for task that must run one time on the leader (bootstrap) node. Es. initialize the cluster
+
+### others
+
+is used for task that must not run on leader node, but on the others nodes. Es. manage scale up of the cluster

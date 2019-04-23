@@ -1,7 +1,12 @@
 version: '3'
 services:
   deploy:
-    container_name: automium-service-provisioner-dev
-    image: automium-service-provisioner-dev
     build:
       context: .
+    volumes:
+      - "/tmp/${CONFIG:-.env}_terraform:/usr/src/provisioner/.terraform"
+  upgrade:
+    build:
+      context: .
+    volumes:
+      - "/tmp/${CONFIG:-.env}_terraform:/usr/src/provisioner/.terraform"

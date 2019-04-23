@@ -1,12 +1,31 @@
 version: '3'
 services:
   deploy:
-    image: automium/service-provisioner
-    container_name: automium-provisioner
+    image: ${SERVICE:-automium/service-provisioner}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    env_file:
+      - ${CONFIG:-.env}
+    network_mode: host
+  upgrade:
+    image: ${SERVICE:-automium/service-provisioner}
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
     env_file: 
-      - .env
+      - ${CONFIG:-.env}
     network_mode: host
+    command: ./upgrade
+  apply:
+    image: ${SERVICE:-automium/service-provisioner}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    env_file:
+      - ${CONFIG:-.env}
+    network_mode: host
+    command: bash ./lib/apply.sh
