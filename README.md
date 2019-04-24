@@ -16,7 +16,6 @@ create a .env file, see [.env.example](https://raw.githubusercontent.com/automiu
 
 ```
 curl -Ss https://raw.githubusercontent.com/automium/provisioner/master/docker-compose.yml > docker-compose.yml
-curl -Ss https://raw.githubusercontent.com/automium/provisioner/master/docker-compose.dev.yml > docker-compose.dev.yml
 ```
 
 ### deploy
@@ -42,7 +41,7 @@ docker-compose pull
 docker-compose run --rm apply
 ```
 
-### contribute
+## contribute
 
 download the repo and make your changes
 
