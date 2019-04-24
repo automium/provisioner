@@ -1,5 +1,7 @@
 # provisioner
 
+[![Build Status](https://travis-ci.org/automium/provisioner.svg?branch=master)](https://travis-ci.org/automium/provisioner)
+
 deploy ansible role in a distribuite manner on your favorite terraform provider
 
 the automium provisioner take care for two special tags for bootstrap your cluster
