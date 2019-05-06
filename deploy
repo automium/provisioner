@@ -23,6 +23,14 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
     DECREASE=true
   fi
 
+  # If going down
+  NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
+  if [ "$DECREASE" == "true" ]; then
+    # Create cleanup task to the queue
+    # Wait until the queue is empty
+    echo null
+  fi
+
   # Change infrastructure
   export QUANTITY_CURRENT
   source lib/apply.sh
