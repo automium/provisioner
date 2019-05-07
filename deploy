@@ -13,6 +13,7 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
   INCREASE=false
   if [ $QUANTITY_CURRENT -lt $QUANTITY ]; then
     QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
+    NEW_NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
     INCREASE=true
   fi
 
@@ -20,20 +21,23 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
   DECREASE=false
   if [ $QUANTITY_CURRENT -gt $QUANTITY ]; then
     QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
-    DECREASE=true
-  fi
-
-  # If going down
-  NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
-  if [ "$DECREASE" == "true" ]; then
+    OLD_NUMBER="$QUANTITY_CURRENT"
     # Create cleanup task to the queue
-    # Wait until the queue is empty
-    echo null
+    curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER}
+    DECREASE=true
   fi
 
   # Change infrastructure
   export QUANTITY_CURRENT
   source lib/apply.sh
+
+  # If going down
+  if [ "$DECREASE" == "true" ]; then
+    # Ensure that cleanup task queue is empty
+    until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER}; do
+      sleep 1
+    done
+  fi
 
   # Wait until consul quantity_current == get_current_quantity
   while [ $(get_current_quantity) -ne ${QUANTITY_CURRENT} ]; do
@@ -42,10 +46,9 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
   done
 
   # If going up
-  NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
   if [ "$INCREASE" == "true" ]; then
     # Wait until there is no issue in the node
-    wait_health_ok ${IDENTITY}-${NUMBER}
+    wait_health_ok ${IDENTITY}-${NEW_NUMBER}
   fi
 
   sleep 10
