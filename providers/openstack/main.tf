@@ -1,17 +1,17 @@
 data "openstack_networking_network_v2" "network" {
-  name = "${var.network_name}"
-  region = "${var.region}"
+  name = "${var.os_network_name}"
+  region = "${var.os_region}"
 }
 
 data "openstack_networking_subnet_v2" "subnet" {
   network_id = "${data.openstack_networking_network_v2.network.id}"
-  region = "${var.region}"
+  region = "${var.os_region}"
 }
 
 module "internal" {
   source = "github.com/automium/terraform-modules//openstack/security?ref=master"
   name = "internal"
-  region = "${var.region}"
+  region = "${var.os_region}"
   protocol = ""
   allow_remote = "${data.openstack_networking_subnet_v2.subnet.cidr}"
 }
@@ -19,12 +19,12 @@ module "internal" {
 module "instance" {
   source = "github.com/automium/terraform-modules//openstack/instance?ref=master"
   name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
-  region = "${var.region}"
+  region = "${var.os_region}"
   image = "${var.image}"
   quantity = "${var.quantity}"
   discovery = "false"
   flavor = "${var.flavor}"
-  network_name = "${var.network_name}"
+  network_name = "${var.os_network_name}"
   sec_group = ["${module.internal.sg_id}"]
   keypair = "${var.keypair_name}"
   allowed_address_pairs = "0.0.0.0/0"

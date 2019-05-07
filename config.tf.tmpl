@@ -20,10 +20,10 @@ variable "provisioner_role_version" { default = "${PROVISIONER_ROLE_VERSION}" }
 
 variable "flavor" { default = "${FLAVOR}" }
 variable "keypair_name" { default = "${KEYPAIR_NAME}" }
-variable "network_name" { default = "${OS_NETWORK_NAME}" }
-variable "region" { default = "${OS_REGION_NAME}" }
-variable "auth_url" { default = "${OS_AUTH_URL}" }
-variable "tenant_name" { default = "${OS_TENANT_NAME}" }
-variable "tenant_id" { default = "${OS_TENANT_ID}" }
-variable "user_name" { default = "${OS_USERNAME}" }
-variable "password" { default = "${OS_PASSWORD}" }
+variable "os_network_name" { default = "${OS_NETWORK_NAME}" }
+variable "os_region" { default = "${OS_REGION_NAME}" }
+variable "os_auth_url" { default = "${OS_AUTH_URL}" }
+variable "os_tenant_name" { default = "${OS_TENANT_NAME}" }
+variable "os_tenant_id" { default = "${OS_TENANT_ID}" }
+variable "os_user_name" { default = "${OS_USERNAME}" }
+variable "os_password" { default = "${OS_PASSWORD}" }
