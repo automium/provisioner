@@ -19,6 +19,16 @@ services:
       - ${CONFIG:-.env}
     network_mode: host
     command: ./upgrade
+  remove:
+    image: ${SERVICE:-automium/service-provisioner}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    env_file: 
+      - ${CONFIG:-.env}
+    network_mode: host
+    command: ./remove
   apply:
     image: ${SERVICE:-automium/service-provisioner}
     logging:

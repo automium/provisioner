@@ -10,6 +10,11 @@ services:
       context: .
     volumes:
       - "/tmp/${CONFIG:-.env}_terraform:/usr/src/provisioner/.terraform"
+  remove:
+    build:
+      context: .
+    volumes:
+      - "/tmp/${CONFIG:-.env}_terraform:/usr/src/provisioner/.terraform"
   apply:
     build:
       context: .
