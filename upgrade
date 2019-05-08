@@ -30,12 +30,20 @@ for n in $(seq 1 $QUANTITY_TAINT); do
     terraform taint -module=instance $RESOURCE.$NUMBER
   done
 
+  # Create cleanup task to the queue
+  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER}
+
   # Recreate tainted instance $NUMBER
   QUANTITY_CURRENT=$QUANTITY
   export QUANTITY_CURRENT
   cd ../..
   source lib/apply.sh
   source lib/init.sh
+
+  # Ensure that cleanup task queue is empty
+  until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER}; do
+    sleep 1
+  done
 
   # TODO found a smart way to get the state change
   sleep 10
