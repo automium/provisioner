@@ -13,7 +13,14 @@ else
 fi
 
 CONTAINERS="$(swift --os-auth-url $OS_AUTH_URL --os-tenant-name $OS_TENANT_NAME --os-username $OS_USERNAME --os-password $OS_PASSWORD list)"
-if [ -z "$(echo $CONTAINERS | grep ${PROVIDER}-${IDENTITY})" ]; then
+CONTAINER_EXIST=false
+for CONTAINER in $CONTAINERS; do
+  if [ "$CONTAINER" == "${PROVIDER}-${IDENTITY}" ]; then
+    CONTAINER_EXIST=true
+  fi;
+done
+
+if [ $CONTAINER_EXIST == "false" ]; then
   swift --os-auth-url https://api.entercloudsuite.com/v2.0 --os-tenant-name $OS_TENANT_NAME --os-username $OS_USERNAME --os-password $OS_PASSWORD post ${PROVIDER}-${IDENTITY}
 fi
 
