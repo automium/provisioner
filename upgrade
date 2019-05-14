@@ -1,20 +1,34 @@
 #!/bin/bash
 
-set -x
+
+if [ "$DEBUG" = "true" ]; then
+  set -x
+fi
 set -e
+
+echo "$(date +%x\ %H:%M:%S) Start rolling upgrade"
 
 # Import basic functions
 source lib/helpers.sh
+source lib/init.sh
 
 # Test that the upgrade works on a new node
-echo Test that the upgrade works on a new node
-QUANTITY=$(echo "$QUANTITY + 1" | bc)
+echo "$(date +%x\ %H:%M:%S) Test that the upgrade works on a new node"
+QUANTITY=$(echo "$(get_current_quantity) + 1" | bc)
 export QUANTITY
 source deploy
 
+# Wait until all the cluster status is fine
+echo "$(date +%x\ %H:%M:%S) Wait until all the cluster status is fine"
+for n in $(seq 1 $QUANTITY); do
+  NUMBER=$(echo "$n - 1" | bc)
+  wait_health_ok $IDENTITY-$NUMBER
+done
+echo "$(date +%x\ %H:%M:%S) Cluster status is ok"
+
 # Workaround: cd into the providers directory to see state items
 cd providers/$PROVIDER
-ln -s ../../.terraform .
+[ -L .terraform ] || ln -s ../../.terraform . >/dev/null
 cd ../..
 
 QUANTITY_TAINT=$(echo "$QUANTITY - 1" | bc)
@@ -31,7 +45,7 @@ for n in $(seq 1 $QUANTITY_TAINT); do
   done
 
   # Create cleanup task to the queue
-  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER}
+  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER} > /dev/null
 
   # Recreate tainted instance $NUMBER
   QUANTITY_CURRENT=$QUANTITY
@@ -41,7 +55,7 @@ for n in $(seq 1 $QUANTITY_TAINT); do
   source lib/init.sh
 
   # Ensure that cleanup task queue is empty
-  until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER}; do
+  until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER} > /dev/null; do
     sleep 1
   done
 
@@ -53,6 +67,8 @@ for n in $(seq 1 $QUANTITY_TAINT); do
 done
 
 # Decrease number to the orginal number
-echo Decrease quantity to the orginal number
+echo "$(date +%x\ %H:%M:%S) Decrease quantity to the orginal number"
 export QUANTITY=$QUANTITY_TAINT
 source deploy
+
+echo "$(date +%x\ %H:%M:%S) Rolling upgrade ended"

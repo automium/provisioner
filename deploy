@@ -1,9 +1,14 @@
 #!/bin/bash
 
-set -x
+if [ "$DEBUG" = "true" ]; then
+  set -x
+fi
 set -e
 
+echo "$(date +%x\ %H:%M:%S) Start incremental deploy"
+
 source lib/helpers.sh
+source lib/init.sh
 
 while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
 
@@ -15,6 +20,7 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
     QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
     NEW_NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
     INCREASE=true
+    echo "$(date +%x\ %H:%M:%S) Create instance ${IDENTITY}-${NEW_NUMBER}"
   fi
 
   # The instance are decreasing
@@ -23,8 +29,9 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
     QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
     OLD_NUMBER="$QUANTITY_CURRENT"
     # Create cleanup task to the queue
-    curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER}
+    curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER} > /dev/null
     DECREASE=true
+    echo "$(date +%x\ %H:%M:%S) Delete instance ${IDENTITY}-${OLD_NUMBER}"
   fi
 
   # Change infrastructure
@@ -34,16 +41,10 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
   # If going down
   if [ "$DECREASE" == "true" ]; then
     # Ensure that cleanup task queue is empty
-    until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER}; do
+    until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER} > /dev/null; do
       sleep 1
     done
   fi
-
-  # Wait until consul quantity_current == get_current_quantity
-  while [ $(get_current_quantity) -ne ${QUANTITY_CURRENT} ]; do
-      echo "Wait until current quantity is increased"
-      sleep 10
-  done
 
   # If going up
   if [ "$INCREASE" == "true" ]; then
@@ -54,3 +55,5 @@ while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
   sleep 10
 
 done
+
+echo "$(date +%x\ %H:%M:%S) Incremental deploy ended"

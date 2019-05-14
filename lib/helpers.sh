@@ -1,7 +1,11 @@
 #!/bin/bash
 
 get_current_quantity() {
-  curl -Ss ${CONSUL}:${CONSUL_PORT}/v1/agent/members | jq ".[] | select(.Name | contains(\"${IDENTITY}-\")) and select(.Status!=3)" | wc -l
+  set -e
+  cd providers/$PROVIDER >/dev/null
+  [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
+  terraform state list | grep openstack_compute_instance_v2 | wc -l
+  cd ../.. >/dev/null
 }
 
 get_health_issues() {
@@ -18,7 +22,7 @@ get_health_issues() {
 
 wait_health_ok() {
   while [ "$(get_health_issues $1)" ]; do
-    echo "Wait until there is no issue in the spawned node"
+    echo "$(date +%x\ %H:%M:%S) Wait until all Consul's checks are fine on node $1"
     sleep 10
   done
 }

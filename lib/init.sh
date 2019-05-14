@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 envsubst < config.tf.tmpl > config.tf
 
 if [ "$DEBUG" == "true" ]; then

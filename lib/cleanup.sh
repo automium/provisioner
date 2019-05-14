@@ -1,8 +1,7 @@
 #!/bin/bash
 
-set -x
-
 if [ "$DEBUG" = "true" ]; then
+  set -x
   cat config.tf
 fi
 
