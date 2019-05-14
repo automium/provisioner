@@ -45,6 +45,8 @@ run_bootstrap() {
   export COMPLETED=false
   while [ "$COMPLETED" == "false" ]; do
     (
+      set -e
+      set -o pipefail
       cd /usr/src/cloud
       source venv/bin/activate
       export HOME=/root
