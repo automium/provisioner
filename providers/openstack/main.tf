@@ -9,7 +9,7 @@ data "openstack_networking_subnet_v2" "subnet" {
 }
 
 module "internal" {
-  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.2"
+  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.3"
   name = "internal"
   region = "${var.os_region}"
   protocol = ""
@@ -17,7 +17,7 @@ module "internal" {
 }
 
 module "instance" {
-  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.2"
+  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.3"
   name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
   region = "${var.os_region}"
   image = "${var.image}"
@@ -30,4 +30,8 @@ module "instance" {
   allowed_address_pairs = "0.0.0.0/0"
   userdata = "${data.template_file.cloud-config.*.rendered}"
   postdestroy = "${data.template_file.cleanup.rendered}"
+  auth_url = "${var.os_auth_url}"
+  tenant_name = "${var.os_tenant_name}"
+  user_name = "${var.os_user_name}"
+  password = "${var.os_password}"
 }
