@@ -8,12 +8,13 @@ set -e
 
 echo "$(date +%x\ %H:%M:%S) Start rolling upgrade"
 
-# Clean up old tasks
-curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
-
 # Import basic functions
 source lib/helpers.sh
 source lib/init.sh
+
+# Clean up old interrupted process
+curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
+untaint_nodes
 
 # Test that the upgrade works on a new node
 echo "$(date +%x\ %H:%M:%S) Test that the upgrade works on a new node"
@@ -29,23 +30,11 @@ for n in $(seq 1 $QUANTITY); do
 done
 echo "$(date +%x\ %H:%M:%S) Cluster status is ok"
 
-# Workaround: cd into the providers directory to see state items
-cd providers/$PROVIDER
-[ -L .terraform ] || ln -s ../../.terraform . >/dev/null
-cd ../..
-
 QUANTITY_TAINT=$(echo "$QUANTITY - 1" | bc)
 
 for n in $(seq 1 $QUANTITY_TAINT); do
   NUMBER=$(echo "$n - 1" | bc)
-
-  cd providers/$PROVIDER
-
-  # Taint resource in instance $NUMBER
-  terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
-    RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
-    terraform taint -module=instance $RESOURCE.$NUMBER
-  done
+  taint_node $NUMBER
 
   # Create cleanup task to the queue
   curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER} > /dev/null
@@ -53,7 +42,6 @@ for n in $(seq 1 $QUANTITY_TAINT); do
   # Recreate tainted instance $NUMBER
   QUANTITY_CURRENT=$QUANTITY
   export QUANTITY_CURRENT
-  cd ../..
   source lib/apply.sh
   source lib/init.sh
 

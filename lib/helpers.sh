@@ -27,6 +27,39 @@ wait_health_ok() {
   done
 }
 
+taint_node() {
+  NUMBER=$1
+  # Workaround: cd into the providers directory to see state items
+  cd providers/$PROVIDER
+  [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
+  # Taint resource in instance $NUMBER
+  terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
+    RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
+    terraform taint -module=instance $RESOURCE.$NUMBER
+  done
+  cd ../..
+}
+
+untaint_node() {
+  NUMBER=$1
+  # Workaround: cd into the providers directory to see state items
+  cd providers/$PROVIDER
+  [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
+  # Taint resource in instance $NUMBER
+  terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
+    RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
+    terraform untaint -module=instance $RESOURCE.$NUMBER
+  done
+  cd ../..
+}
+
+untaint_nodes() {
+  for n in $(seq 1 $(get_current_quantity)); do
+    NUMBER=$(echo "$n - 1" | bc)
+    untaint_node $NUMBER
+  done
+}
+
 # Get the id of the instance
 if [ "$CLUSTER_NAME" ]; then
   export IDENTITY=${CLUSTER_NAME}-${NAME}

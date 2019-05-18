@@ -7,11 +7,12 @@ set -e
 
 echo "$(date +%x\ %H:%M:%S) Start incremental deploy"
 
-# Clean up old tasks
-curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
-
 source lib/helpers.sh
 source lib/init.sh
+
+# Clean up old interrupted process
+curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
+untaint_nodes
 
 while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
 
