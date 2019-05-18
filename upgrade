@@ -8,6 +8,9 @@ set -e
 
 echo "$(date +%x\ %H:%M:%S) Start rolling upgrade"
 
+# Clean up old tasks
+curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
+
 # Import basic functions
 source lib/helpers.sh
 source lib/init.sh
