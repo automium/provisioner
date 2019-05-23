@@ -1,10 +1,10 @@
 #!/bin/bash
 
 get_current_quantity() {
-  cd providers/$PROVIDER >/dev/null
-  [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
+  cd providers/$PROVIDER > /dev/null
+  [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   terraform state list | grep openstack_compute_instance_v2 | wc -l
-  cd ../.. >/dev/null
+  cd ../.. > /dev/null
 }
 
 get_health_issues() {
@@ -30,7 +30,7 @@ taint_node() {
   NUMBER=$1
   # Workaround: cd into the providers directory to see state items
   cd providers/$PROVIDER
-  [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
+  [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   # Taint resource in instance $NUMBER
   terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
     RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
@@ -43,7 +43,7 @@ untaint_node() {
   NUMBER=$1
   # Workaround: cd into the providers directory to see state items
   cd providers/$PROVIDER
-  [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
+  [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   # Taint resource in instance $NUMBER
   terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
     RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
