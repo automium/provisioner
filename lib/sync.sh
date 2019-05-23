@@ -27,7 +27,8 @@ for DESTROY_NUMBER in $DESTROY_NUMBERS; do
 done
 
 for CREATE_NUMBER in $CREATE_NUMBERS; do
-  echo "$(date +%x\ %H:%M:%S) [WAIT] instance ${IDENTITY}-${CREATE_NUMBER}"
+  echo "$(date +%x\ %H:%M:%S) [START] Wait instance ${IDENTITY}-${CREATE_NUMBER}"
   wait_health_ok ${IDENTITY}-${CREATE_NUMBER}
+  echo "$(date +%x\ %H:%M:%S) [END] Wait instance ${IDENTITY}-${CREATE_NUMBER}"
   echo "$(date +%x\ %H:%M:%S) [END] Create instance ${IDENTITY}-${CREATE_NUMBER}"
 done
