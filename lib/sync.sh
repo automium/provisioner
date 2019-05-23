@@ -7,13 +7,13 @@ curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${I
 
 source lib/plan.sh
 
-DESTROY_NUMBERS=$(tfjson plan.tfplan | jq -r ".instance | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==true) | .key" | cut -d . -f 3)
+DESTROY_NUMBERS=$(tfjson plan.tfplan | jq -r ".instance // empty | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==true) | .key" | cut -d . -f 3)
 for DESTROY_NUMBER in $DESTROY_NUMBERS; do
   curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${DESTROY_NUMBER} > /dev/null
   echo "$(date +%x\ %H:%M:%S) [START] Destroy instance ${IDENTITY}-${DESTROY_NUMBER}"
 done
 
-CREATE_NUMBERS=$(tfjson plan.tfplan | jq -r ".instance | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==false or .value.destroy_tainted==true) | .key" | cut -d . -f 3)
+CREATE_NUMBERS=$(tfjson plan.tfplan | jq -r ".instance // empty | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==false or .value.destroy_tainted==true) | .key" | cut -d . -f 3)
 for CREATE_NUMBER in $CREATE_NUMBERS; do
   echo "$(date +%x\ %H:%M:%S) [START] Create instance ${IDENTITY}-${CREATE_NUMBER}"
 done
