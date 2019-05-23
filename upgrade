@@ -1,65 +1,53 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
 
 if [ "$DEBUG" = "true" ]; then
   set -x
 fi
-set -e
 
-echo "$(date +%x\ %H:%M:%S) Start rolling upgrade"
+echo "$(date +%x\ %H:%M:%S) [START] Rolling upgrade"
 
 # Import basic functions
 source lib/helpers.sh
 source lib/init.sh
 
-# Clean up old interrupted process
-curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
-untaint_nodes
+# Sync the terrafrom state
+echo "$(date +%x\ %H:%M:%S) [START] Check that current status is consistent"
+export QUANTITY_CURRENT=$(get_current_quantity)
+source lib/sync.sh
+echo "$(date +%x\ %H:%M:%S) [END] Check that current status is consistent"
 
 # Test that the upgrade works on a new node
-echo "$(date +%x\ %H:%M:%S) Test that the upgrade works on a new node"
-QUANTITY=$(echo "$(get_current_quantity) + 1" | bc)
-export QUANTITY
-source deploy
+echo "$(date +%x\ %H:%M:%S) [START] Test that the upgrade works on a new node"
+export QUANTITY_CURRENT=$(echo "$(get_current_quantity) + 1" | bc)
+source lib/sync.sh
+echo "$(date +%x\ %H:%M:%S) [END] Test that the upgrade works on a new node"
 
 # Wait until all the cluster status is fine
-echo "$(date +%x\ %H:%M:%S) Wait until all the cluster status is fine"
-for n in $(seq 1 $QUANTITY); do
+echo "$(date +%x\ %H:%M:%S) [START] Wait until all the cluster status is fine"
+QUANTITY_TAINT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
+for n in $(seq 1 $QUANTITY_TAINT); do
   NUMBER=$(echo "$n - 1" | bc)
   wait_health_ok $IDENTITY-$NUMBER
 done
-echo "$(date +%x\ %H:%M:%S) Cluster status is ok"
+echo "$(date +%x\ %H:%M:%S) [END] Wait until all the cluster status is fine"
 
-QUANTITY_TAINT=$(echo "$QUANTITY - 1" | bc)
-
+# Recreate all nodes sequentially
+QUANTITY_TAINT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
 for n in $(seq 1 $QUANTITY_TAINT); do
   NUMBER=$(echo "$n - 1" | bc)
   taint_node $NUMBER
 
-  # Create cleanup task to the queue
-  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER} > /dev/null
-
   # Recreate tainted instance $NUMBER
-  QUANTITY_CURRENT=$QUANTITY
-  export QUANTITY_CURRENT
-  source lib/apply.sh
-  source lib/init.sh
-
-  # Ensure that cleanup task queue is empty
-  until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${NUMBER} > /dev/null; do
-    sleep 1
-  done
-
-  # TODO found a smart way to get the state change
-  sleep 10
-
-  # Wait until node is ready
-  wait_health_ok $IDENTITY-$NUMBER
+  source lib/sync.sh
 done
 
 # Decrease number to the orginal number
-echo "$(date +%x\ %H:%M:%S) Decrease quantity to the orginal number"
-export QUANTITY=$QUANTITY_TAINT
-source deploy
+echo "$(date +%x\ %H:%M:%S) [START] Decrease quantity to the orginal number $QUANTITY"
+export QUANTITY_CURRENT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
+source lib/sync.sh
+echo "$(date +%x\ %H:%M:%S) [END] Decrease quantity to the orginal number $QUANTITY"
 
-echo "$(date +%x\ %H:%M:%S) Rolling upgrade ended"
+echo "$(date +%x\ %H:%M:%S) [END] Rolling upgrade"

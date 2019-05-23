@@ -1,4 +1,19 @@
+FROM golang AS build-env
+RUN go get github.com/palantir/tfjson && \
+    cd $GOPATH/src/github.com/palantir/tfjson && \
+    rm -rf vendor && \
+    go get -v ./... && \
+    sed -i 's/t\.Helper/\/\/t\.Helper/g' ../../hashicorp/terraform/config/testing.go && \
+    cd $GOPATH/src/github.com/hashicorp/terraform && \
+    git checkout v0.11 && \
+    cd $GOPATH/src/github.com/palantir/tfjson && \
+    go get -v ./... && \
+    go install ./...
+
 FROM ubuntu:18.04
+
+# tfjson
+COPY --from=build-env /go/bin/tfjson /usr/local/bin/tfjson
 
 # terraform
 ENV TERRAFORM_VERSION=0.11.13

@@ -1,11 +1,11 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 if [ "$DEBUG" = "true" ]; then
   set -x
 fi
-set -e
 
-export QUANTITY_CURRENT=${QUANTITY}
 source lib/init.sh
-
-terraform destroy -auto-approve providers/$PROVIDER
+source lib/destroy.sh

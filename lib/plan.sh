@@ -7,6 +7,6 @@ if [ -z "$QUANTITY_CURRENT" ]; then
   source lib/init.sh
 fi
 
-[ -f plan.tfplan ] || source lib/plan.sh
-terraform apply -auto-approve plan.tfplan
-rm plan.tfplan
+envsubst < config.tf.tmpl > config.tf
+
+terraform plan -out=plan.tfplan providers/$PROVIDER

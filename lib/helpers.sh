@@ -1,7 +1,6 @@
 #!/bin/bash
 
 get_current_quantity() {
-  set -e
   cd providers/$PROVIDER >/dev/null
   [ -L .terraform ] || ln -s ../../.terraform . >/dev/null
   terraform state list | grep openstack_compute_instance_v2 | wc -l

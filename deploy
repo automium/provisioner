@@ -1,63 +1,38 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 if [ "$DEBUG" = "true" ]; then
   set -x
 fi
-set -e
 
-echo "$(date +%x\ %H:%M:%S) Start incremental deploy"
-
+# Import basic functions
 source lib/helpers.sh
 source lib/init.sh
 
-# Clean up old interrupted process
-curl -f -sS -X DELETE "http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup?recurse=yes"
-untaint_nodes
+# Sync the terrafrom state
+echo "$(date +%x\ %H:%M:%S) [START] Check that current status is consistent"
+export QUANTITY_CURRENT=$(get_current_quantity)
+source lib/sync.sh
+echo "$(date +%x\ %H:%M:%S) [END] Check that current status is consistent"
 
-while [ $(get_current_quantity) -ne ${QUANTITY} ]; do
+echo "$(date +%x\ %H:%M:%S) [START] Incremental deploy"
 
-  QUANTITY_CURRENT=$(get_current_quantity)
+while [ ${QUANTITY_CURRENT} -ne ${QUANTITY} ]; do
 
   # The instance are increasing
-  INCREASE=false
   if [ $QUANTITY_CURRENT -lt $QUANTITY ]; then
-    QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
-    NEW_NUMBER=$(echo "$QUANTITY_CURRENT - 1" | bc)
-    INCREASE=true
-    echo "$(date +%x\ %H:%M:%S) Create instance ${IDENTITY}-${NEW_NUMBER}"
+    export QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
   fi
 
   # The instance are decreasing
-  DECREASE=false
   if [ $QUANTITY_CURRENT -gt $QUANTITY ]; then
-    QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
-    OLD_NUMBER="$QUANTITY_CURRENT"
-    # Create cleanup task to the queue
-    curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER} > /dev/null
-    DECREASE=true
-    echo "$(date +%x\ %H:%M:%S) Delete instance ${IDENTITY}-${OLD_NUMBER}"
+    export QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
   fi
 
-  # Change infrastructure
-  export QUANTITY_CURRENT
-  source lib/apply.sh
-
-  # If going down
-  if [ "$DECREASE" == "true" ]; then
-    # Ensure that cleanup task queue is empty
-    until curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${OLD_NUMBER} > /dev/null; do
-      sleep 1
-    done
-  fi
-
-  # If going up
-  if [ "$INCREASE" == "true" ]; then
-    # Wait until there is no issue in the node
-    wait_health_ok ${IDENTITY}-${NEW_NUMBER}
-  fi
-
-  sleep 10
+  source lib/sync.sh
 
 done
 
-echo "$(date +%x\ %H:%M:%S) Incremental deploy ended"
+echo "$(date +%x\ %H:%M:%S) [END] Incremental deploy"
