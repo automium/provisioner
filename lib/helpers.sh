@@ -19,6 +19,38 @@ get_health_issues() {
   echo $OUTPUT | jq ".[] | select(.Status!=\"passing\")"
 }
 
+get_destroy_nodes() {
+
+  DESTROY_NODES=$(tfjson plan.tfplan | jq -r ".instance // empty | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==true) | .key" )
+
+  if [ -z "$( echo $DESTROY_NODES )" ]; then
+    return
+  fi
+  if [ -z "$( echo $DESTROY_NODES | cut -d . -f 3 )" ]; then
+    echo 0
+  else
+    for n in $DESTROY_NODES; do
+      echo $n | cut -d . -f 3
+    done
+  fi
+}
+
+get_create_nodes() {
+
+  CREATE_NODES=$(tfjson plan.tfplan | jq -r ".instance // empty | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==false or .value.destroy_tainted==true) | .key" )
+
+  if [ -z "$( echo $CREATE_NODES )" ]; then
+    return
+  fi
+  if [ -z "$( echo $CREATE_NODES | cut -d . -f 3 )" ]; then
+    echo 0
+  else
+    for n in $CREATE_NODES; do
+      echo $n | cut -d . -f 3
+    done
+  fi
+}
+
 wait_health_ok() {
   while [ "$(get_health_issues $1)" ]; do
     echo "$(date +%x\ %H:%M:%S) Wait until all Consul's checks are fine on node $1"
