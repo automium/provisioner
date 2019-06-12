@@ -9,7 +9,7 @@ source lib/plan.sh
 
 DESTROY_NUMBERS=$(get_destroy_nodes)
 for DESTROY_NUMBER in $DESTROY_NUMBERS; do
-  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${DESTROY_NUMBER} > /dev/null
+  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/cleanup/${IDENTITY}-${DESTROY_NUMBER} -d "{ \"name\": \"${IDENTITY}-${DESTROY_NUMBER}\" }" > /dev/null
   echo "$(date +%x\ %H:%M:%S) [START] Destroy instance ${IDENTITY}-${DESTROY_NUMBER}"
 done
 
@@ -22,7 +22,7 @@ source lib/apply.sh
 
 for DESTROY_NUMBER in $DESTROY_NUMBERS; do
   # Clean up removing task
-  curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/${IDENTITY}/cleanup/${IDENTITY}-${DESTROY_NUMBER} > /dev/null
+  curl -f -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/cleanup/${IDENTITY}-${DESTROY_NUMBER} > /dev/null
   echo "$(date +%x\ %H:%M:%S) [END] Destroy instance ${IDENTITY}-${DESTROY_NUMBER}"
 done
 
