@@ -35,10 +35,10 @@ run_bootstrap() {
   export ssh_keys_enabled=$${2}
   export provisioner_role_enabled=$${3}
   export bootstrap_session=$(curl -s -X PUT "http://$${consul}:$${consul_port}/v1/session/create" | jq .ID | sed 's/"//g')
-  export bootstrap=$(curl -s -X PUT --data "{ name: $${identity}-$${number}.node.$${consul_datacenter}.consul }" "http://$${consul}:$${consul_port}/v1/kv/$${consul_path}/custom_bootstrap?acquire=$${bootstrap_session}")
+  export bootstrap=$(curl -s -X PUT --data "{ \"name\": \"$${identity}-$${number}\" }" "http://$${consul}:$${consul_port}/v1/kv/$${consul_path}/custom_bootstrap?acquire=$${bootstrap_session}")
 
   if [ "$bootstrap" == "true" ]; then
-      echo "im the bootstrap node for $${consul_path}"
+    echo "im the bootstrap node for $${consul_path}"
   fi
 
   # Run main playbook
