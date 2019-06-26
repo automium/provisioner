@@ -21,6 +21,11 @@ fi
 
 export number=${number}
 
+# Define which service version use
+if [ ! "$provisioner_role_version" ]; then
+  export provisioner_role_version=$${image}
+fi
+
 # Setup ansible role provisioner requirement
 cd /usr/src/cloud
 cat << EOG > provisioner_requirement.yml
