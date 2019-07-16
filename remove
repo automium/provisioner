@@ -2,6 +2,7 @@
 
 set -e
 set -o pipefail
+set -E
 
 if [ "$DEBUG" = "true" ]; then
   set -x

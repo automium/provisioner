@@ -1,6 +1,15 @@
 #!/bin/bash
 
+traperr() {
+  echo "ERROR: ${BASH_SOURCE[1]} at line ${BASH_LINENO[0]}"
+}
+
+trap traperr ERR
+
 get_current_quantity() {
+  set -e
+  set -o pipefail
+
   cd providers/$PROVIDER > /dev/null
   [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   terraform state list | grep openstack_compute_instance_v2 | wc -l
@@ -8,6 +17,9 @@ get_current_quantity() {
 }
 
 get_health_issues() {
+  set -e
+  set -o pipefail
+
   OUTPUT=$(curl -Ss ${CONSUL}:${CONSUL_PORT}/v1/health/node/${1})
   if [ -z "$OUTPUT" ]; then
     echo get_health_issues: no check found
@@ -20,6 +32,8 @@ get_health_issues() {
 }
 
 get_destroy_nodes() {
+  set -e
+  set -o pipefail
 
   DESTROY_NODES=$(tfjson plan.tfplan | jq -r ".instance // empty | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==true) | .key" )
 
@@ -36,6 +50,8 @@ get_destroy_nodes() {
 }
 
 get_create_nodes() {
+  set -e
+  set -o pipefail
 
   CREATE_NODES=$(tfjson plan.tfplan | jq -r ".instance // empty | with_entries(select(.key|contains(\"openstack_compute_instance_v2.cluster\"))) | to_entries[] | select(.value.destroy==false or .value.destroy_tainted==true) | .key" )
 
@@ -52,6 +68,9 @@ get_create_nodes() {
 }
 
 wait_health_ok() {
+  set -e
+  set -o pipefail
+
   while [ "$(get_health_issues $1)" ]; do
     echo "$(date +%x\ %H:%M:%S) Wait until all Consul's checks are fine on node $1"
     sleep 10
@@ -59,6 +78,9 @@ wait_health_ok() {
 }
 
 taint_node() {
+  set -e
+  set -o pipefail
+
   NUMBER=$1
   # Workaround: cd into the providers directory to see state items
   cd providers/$PROVIDER
@@ -72,6 +94,9 @@ taint_node() {
 }
 
 untaint_node() {
+  set -e
+  set -o pipefail
+
   NUMBER=$1
   # Workaround: cd into the providers directory to see state items
   cd providers/$PROVIDER
@@ -85,6 +110,9 @@ untaint_node() {
 }
 
 untaint_nodes() {
+  set -e
+  set -o pipefail
+
   for n in $(seq 1 $(get_current_quantity)); do
     NUMBER=$(echo "$n - 1" | bc)
     untaint_node $NUMBER
@@ -93,7 +121,9 @@ untaint_nodes() {
 
 # Get the id of the instance
 if [ "$CLUSTER_NAME" ]; then
-  export IDENTITY=${CLUSTER_NAME}-${NAME}
+  IDENTITY=${CLUSTER_NAME}-${NAME}
+  export IDENTITY
 else
-  export IDENTITY=${NAME}
+  IDENTITY=${NAME}
+  export IDENTITY
 fi

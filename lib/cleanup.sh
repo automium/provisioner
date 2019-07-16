@@ -13,9 +13,11 @@ EOC
 )
 
 if [ "$cluster_name" ]; then
-  export identity=$${cluster_name}-$${name}
+  identity=$${cluster_name}-$${name}
+  export identity
 else
-  export identity=$${name}
+  identity=$${name}
+  export identity
 fi
 
 node_exist() {

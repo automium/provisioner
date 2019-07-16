@@ -2,6 +2,7 @@
 
 set -e
 set -o pipefail
+set -E
 
 if [ "$DEBUG" = "true" ]; then
   set -x
@@ -13,7 +14,8 @@ source lib/init.sh
 
 # Sync the terrafrom state
 echo "$(date +%x\ %H:%M:%S) [START] Check that current status is consistent"
-export QUANTITY_CURRENT=$(get_current_quantity)
+QUANTITY_CURRENT=$(get_current_quantity)
+export QUANTITY_CURRENT
 source lib/sync.sh
 echo "$(date +%x\ %H:%M:%S) [END] Check that current status is consistent"
 
@@ -26,12 +28,14 @@ while [ ${QUANTITY_CURRENT} -ne ${QUANTITY} ]; do
 
   # The instance are increasing
   if [ $QUANTITY_CURRENT -lt $QUANTITY ]; then
-    export QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
+    QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT + 1" | bc)
+    export QUANTITY_CURRENT
   fi
 
   # The instance are decreasing
   if [ $QUANTITY_CURRENT -gt $QUANTITY ]; then
-    export QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
+    QUANTITY_CURRENT=$(echo "$QUANTITY_CURRENT - 1" | bc)
+    export QUANTITY_CURRENT
   fi
 
   source lib/sync.sh

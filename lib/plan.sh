@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 # If apply.sh is called directly
 if [ -z "$QUANTITY_CURRENT" ]; then
   QUANTITY_CURRENT=$QUANTITY

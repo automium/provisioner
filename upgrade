@@ -2,6 +2,7 @@
 
 set -e
 set -o pipefail
+set -E
 
 if [ "$DEBUG" = "true" ]; then
   set -x
@@ -15,13 +16,15 @@ source lib/init.sh
 
 # Sync the terrafrom state
 echo "$(date +%x\ %H:%M:%S) [START] Check that current status is consistent"
-export QUANTITY_CURRENT=$(get_current_quantity)
+QUANTITY_CURRENT=$(get_current_quantity)
+export QUANTITY_CURRENT
 source lib/sync.sh
 echo "$(date +%x\ %H:%M:%S) [END] Check that current status is consistent"
 
 # Test that the upgrade works on a new node
 echo "$(date +%x\ %H:%M:%S) [START] Test that the upgrade works on a new node"
-export QUANTITY_CURRENT=$(echo "$(get_current_quantity) + 1" | bc)
+QUANTITY_CURRENT=$(echo "$(get_current_quantity) + 1" | bc)
+export QUANTITY_CURRENT
 source lib/sync.sh
 echo "$(date +%x\ %H:%M:%S) [END] Test that the upgrade works on a new node"
 
@@ -46,7 +49,8 @@ done
 
 # Decrease number to the orginal number
 echo "$(date +%x\ %H:%M:%S) [START] Decrease quantity to the orginal number $QUANTITY"
-export QUANTITY_CURRENT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
+QUANTITY_CURRENT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
+export QUANTITY_CURRENT
 source lib/sync.sh
 echo "$(date +%x\ %H:%M:%S) [END] Decrease quantity to the orginal number $QUANTITY"
 

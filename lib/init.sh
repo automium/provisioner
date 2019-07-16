@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 envsubst < config.tf.tmpl > config.tf
 
 if [ "$DEBUG" == "true" ]; then

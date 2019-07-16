@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 source lib/helpers.sh
 
 # Clean up old interrupted tasks
