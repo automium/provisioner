@@ -1,7 +1,7 @@
 #!/bin/bash
 
 traperr() {
-  echo "ERROR: ${BASH_SOURCE[1]} at line ${BASH_LINENO[0]}"
+  echo "$(date +%x\ %H:%M:%S) [ERROR] Unexpected error, ${BASH_SOURCE[1]} at line ${BASH_LINENO[0]}"
 }
 
 trap traperr ERR

@@ -19,6 +19,10 @@ for CONTAINER in $CONTAINERS; do
 done
 
 if [ $CONTAINER_EXIST == "false" ]; then
+  if [ "$QUANTITY" == "0" ]; then
+    echo "$(date +%x\ %H:%M:%S) [EXIT] Quantity is 0, nothing to do"
+    exit 0
+  fi
   swift --os-auth-url https://api.entercloudsuite.com/v2.0 --os-tenant-name $OS_TENANT_NAME --os-username $OS_USERNAME --os-password $OS_PASSWORD post ${PROVIDER}-${IDENTITY} > /dev/null
 fi
 
