@@ -11,6 +11,7 @@ fi
 
 CONTAINERS="$(swift --os-auth-url $OS_AUTH_URL --os-tenant-name $OS_TENANT_NAME --os-username $OS_USERNAME --os-password $OS_PASSWORD list)"
 CONTAINER_EXIST=false
+export CONTAINER_EXIST
 for CONTAINER in $CONTAINERS; do
   if [ "$CONTAINER" == "${PROVIDER}-${IDENTITY}" ]; then
     CONTAINER_EXIST=true

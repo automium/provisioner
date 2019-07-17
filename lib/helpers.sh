@@ -12,7 +12,12 @@ get_current_quantity() {
 
   cd providers/$PROVIDER > /dev/null
   [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
-  terraform state list | grep openstack_compute_instance_v2 | wc -l
+  # Is the first deploy
+  if [ "$CONTAINER_EXIST" == "false" ]; then
+    echo 0
+  else
+    terraform state list | grep openstack_compute_instance_v2 | wc -l
+  fi
   cd ../.. > /dev/null
 }
 
