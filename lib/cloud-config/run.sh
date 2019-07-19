@@ -2,16 +2,28 @@
 
 # Define all config.tf vars as bash vars
 eval $(
-cat << EOC | json2hcl -reverse | jq -r '.variable[] | keys[] as $k | "export \($k)=\(.[$k][].default)"'
+cat << EOC | json2hcl -reverse | python3 -c '
+import sys, json
+for i in json.load(sys.stdin)["variable"]:
+  for key, value in i.items():
+    print("export " + key + "=\"" + i[key][0]["default"] + "\"")
+'
 ${config}
 EOC
 )
 
 # Save all config.tf vars as a json for ansible extra vars
-config_json=\{$(cat << EOJ | json2hcl -reverse | jq '.variable[] | keys[] as $k | "\($k)\":\"\(.[$k][].default)"' | while read i; do echo -n $i,; done | sed 's/,$//g'
+config_json=$(cat << EOJ | json2hcl -reverse | python3 -c '
+import sys, json
+d = {}
+for i in json.load(sys.stdin)["variable"]:
+  for key, value in i.items():
+    d[key] = i[key][0]["default"]
+print(json.dumps(d))
+'
 ${config}
 EOJ
-)\}
+)
 export config_json
 
 if [ "$cluster_name" ]; then
