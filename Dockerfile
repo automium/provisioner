@@ -28,7 +28,7 @@ RUN curl -L https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0
     chmod +x /usr/local/bin/json2hcl
 
 # openstack
-RUN apt-get update && apt-get install parallel python-pip -y && \
+RUN apt-get update && apt-get install parallel python-pip python3 -y && \
     python -m pip install --upgrade pip && \
     pip install --user python-swiftclient==3.6.0 python-openstackclient==3.17.0
 
