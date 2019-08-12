@@ -8,6 +8,8 @@ if [ "$DEBUG" = "true" ]; then
   set -x
 fi
 
+echo "$(date +%x\ %H:%M:%S) [START] Incremental deploy"
+
 # Import basic functions
 source lib/helpers.sh
 source lib/init.sh
@@ -19,10 +21,10 @@ export QUANTITY_CURRENT
 source lib/sync.sh
 echo "$(date +%x\ %H:%M:%S) [END] Check that current status is consistent"
 
-echo "$(date +%x\ %H:%M:%S) [START] Incremental deploy"
 # Notify that the deploy is starting
-curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/start -d "{ \"group\": \"${IDENTITY}\", \"number\": \"${QUANTITY}\" }" > /dev/null
+curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/start -d "{ \"group\": \"${IDENTITY}\", \"number\": \"${QUANTITY}\", \"time\": \"$(date +%s)\" }" > /dev/null
 curl -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/start > /dev/null
+curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/ongoing -d "{ \"group\": \"${IDENTITY}\", \"number\": \"${QUANTITY}\", \"time\": \"$(date +%s)\" }" > /dev/null
 
 while [ ${QUANTITY_CURRENT} -ne ${QUANTITY} ]; do
 
@@ -43,6 +45,7 @@ while [ ${QUANTITY_CURRENT} -ne ${QUANTITY} ]; do
 done
 
 # Notify that the deploy is ended
-curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/end -d "{ \"group\": \"${IDENTITY}\", \"number\": \"${QUANTITY}\" }" > /dev/null
+curl -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/ongoing > /dev/null
+curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/end -d "{ \"group\": \"${IDENTITY}\", \"number\": \"${QUANTITY}\", \"time\": \"$(date +%s)\" }" > /dev/null
 curl -sS -X DELETE http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/deploy/end > /dev/null
 echo "$(date +%x\ %H:%M:%S) [END] Incremental deploy"
