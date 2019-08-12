@@ -10,6 +10,9 @@ the automium provisioner take care for two special tags for bootstrap your clust
 
 TODO list the variables here
 
+### PROVISIONER_CONFIG_WAIT_CLEANUP
+if true the provisoiner waits until cleanup is done
+
 ### NETWORK_SECURITY_PORTS
 a list of ports or ranges e.g.
 ```
