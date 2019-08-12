@@ -123,12 +123,3 @@ untaint_nodes() {
     untaint_node $NUMBER
   done
 }
-
-# Get the id of the instance
-if [ "$CLUSTER_NAME" ]; then
-  IDENTITY=${CLUSTER_NAME}-${NAME}
-  export IDENTITY
-else
-  IDENTITY=${NAME}
-  export IDENTITY
-fi

@@ -3,6 +3,15 @@
 set -e
 set -o pipefail
 
+# Get the id of the instance
+if [ "$CLUSTER_NAME" ]; then
+  IDENTITY=${CLUSTER_NAME}-${NAME}
+  export IDENTITY
+else
+  IDENTITY=${NAME}
+  export IDENTITY
+fi
+
 j2 config.tf.tmpl > config.tf
 TEMPLATES=$(find providers -name "*.tmpl")
 for TEMPLATE in $TEMPLATES; do
