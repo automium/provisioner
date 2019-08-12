@@ -11,6 +11,6 @@ if [ -z "$QUANTITY_CURRENT" ]; then
   source lib/init.sh
 fi
 
-envsubst < config.tf.tmpl > config.tf
+j2 config.tf.tmpl > config.tf
 
 terraform plan -out=plan.tfplan providers/$PROVIDER

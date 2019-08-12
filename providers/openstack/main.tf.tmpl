@@ -1,0 +1,76 @@
+{%- set module_network_security_ports = [] -%}
+{%- if NETWORK_SECURITY_PORTS is defined and NETWORK_SECURITY_PORTS|length -%}
+{%- for network_security_port in NETWORK_SECURITY_PORTS.split(",") -%}
+{%- if "-" in network_security_port -%}
+{%- set port_range_min = network_security_port.split("-")[0] %}
+{% set port_range_max = network_security_port.split("-")[1] %}
+{%- else %}
+{%- set port_range_min = network_security_port %}
+{% set port_range_max = network_security_port %}
+{%- endif -%}
+{%- set module_tcp = IDENTITY ~ '_' ~ network_security_port ~ '_tcp' -%}
+{%- set module_udp = IDENTITY ~ '_' ~ network_security_port ~ '_udp' -%}
+{{- module_network_security_ports.append('\"${module.' ~ module_tcp ~ '.sg_id}\"') or "" }}
+{{- module_network_security_ports.append('\"${module.' ~ module_udp ~ '.sg_id}\"') or "" }}
+module "{{ module_tcp }}" {
+  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.7"
+  name = "{{ module_tcp }}"
+  region = "${var.os_region}"
+  protocol = "tcp"
+  port_range_min = {{ port_range_min }}
+  port_range_max = {{ port_range_max }}
+  allow_remote = "0.0.0.0/0"
+}
+
+module "{{ module_udp }}" {
+  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.7"
+  name = "{{ module_udp }}"
+  region = "${var.os_region}"
+  protocol = "udp"
+  port_range_min = {{ port_range_min }}
+  port_range_max = {{ port_range_max }}
+  allow_remote = "0.0.0.0/0"
+}
+{%- endfor %}
+{% endif %}
+{% if module_network_security_ports is defined and module_network_security_ports|length -%}
+{% set module_network_security_ports_string = "," ~ module_network_security_ports|join(",") -%}
+{% endif -%}
+
+data "openstack_networking_network_v2" "network" {
+  name = "${var.os_network_name}"
+  region = "${var.os_region}"
+}
+
+data "openstack_networking_subnet_v2" "subnet" {
+  network_id = "${data.openstack_networking_network_v2.network.id}"
+  region = "${var.os_region}"
+}
+
+module "internal" {
+  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.7"
+  name = "internal"
+  region = "${var.os_region}"
+  protocol = ""
+  allow_remote = "${data.openstack_networking_subnet_v2.subnet.cidr}"
+}
+
+module "instance" {
+  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.7"
+  name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
+  region = "${var.os_region}"
+  image = "${var.image}"
+  quantity = "${var.quantity}"
+  discovery = "false"
+  flavor = "${var.flavor}"
+  network_name = "${var.os_network_name}"
+  sec_group = ["${module.internal.sg_id}"{{- module_network_security_ports_string|default() -}}]
+  keypair = "${var.keypair_name}"
+  allowed_address_pairs = "0.0.0.0/0"
+  userdata = "${data.template_file.cloud-config.*.rendered}"
+  postdestroy = "${data.template_file.cleanup.rendered}"
+  auth_url = "${var.os_auth_url}"
+  tenant_name = "${var.os_tenant_name}"
+  user_name = "${var.os_user_name}"
+  password = "${var.os_password}"
+}

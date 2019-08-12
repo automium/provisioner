@@ -43,7 +43,8 @@ RUN apt-get update && apt-get install python-pip -y && \
 
 # tools
 RUN apt-get update && \
-    apt-get install jq bc gettext-base -y
+    apt-get install jq bc gettext-base -y && \
+    pip install --user j2cli
 
 ENV PATH=$PATH:/root/.local/bin/
 

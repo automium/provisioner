@@ -10,6 +10,12 @@ the automium provisioner take care for two special tags for bootstrap your clust
 
 TODO list the variables here
 
+### NETWORK_SECURITY_PORTS
+a list of ports or ranges e.g.
+```
+80,443,10000-20000
+```
+
 ## usage
 
 create a .env file, see [.env.example](https://raw.githubusercontent.com/automium/provisioner/master/.env.example) and download the composes

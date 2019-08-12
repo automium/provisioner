@@ -1,29 +1,30 @@
 # generic config
 
-variable "quantity" { default = "${QUANTITY_CURRENT}" }
-variable "image" { default = "${IMAGE}" }
-variable "name" { default = "${NAME}" }
-variable "cluster_name" { default = "${CLUSTER_NAME}" }
-variable "consul" { default = "${CONSUL}" }
-variable "consul_port" { default = "${CONSUL_PORT}" }
-variable "consul_encrypt" { default = "${CONSUL_ENCRYPT}" }
-variable "consul_datacenter" { default = "${CONSUL_DATACENTER}" }
-variable "provider" { default = "${PROVIDER}" }
+variable "quantity" { default = "{{ QUANTITY_CURRENT|default() }}" }
+variable "image" { default = "{{ IMAGE }}" }
+variable "name" { default = "{{ NAME }}" }
+variable "cluster_name" { default = "{{ CLUSTER_NAME }}" }
+variable "consul" { default = "{{ CONSUL }}" }
+variable "consul_port" { default = "{{ CONSUL_PORT }}" }
+variable "consul_encrypt" { default = "{{ CONSUL_ENCRYPT }}" }
+variable "consul_datacenter" { default = "{{ CONSUL_DATACENTER }}" }
+variable "network_security_ports" { default = "{{ NETWORK_SECURITY_PORTS|default() }}" }
+variable "provider" { default = "{{ PROVIDER }}" }
 
 # service config
 # see project repo for more config to use
 
-variable "provisioner_role" { default = "${PROVISIONER_ROLE}" }
-variable "provisioner_role_version" { default = "${PROVISIONER_ROLE_VERSION}" }
+variable "provisioner_role" { default = "{{ PROVISIONER_ROLE }}" }
+variable "provisioner_role_version" { default = "{{ PROVISIONER_ROLE_VERSION }}" }
 
 # openstack config
 
-variable "flavor" { default = "${FLAVOR}" }
-variable "keypair_name" { default = "${KEYPAIR_NAME}" }
-variable "os_network_name" { default = "${OS_NETWORK_NAME}" }
-variable "os_region" { default = "${OS_REGION_NAME}" }
-variable "os_auth_url" { default = "${OS_AUTH_URL}" }
-variable "os_tenant_name" { default = "${OS_TENANT_NAME}" }
-variable "os_tenant_id" { default = "${OS_TENANT_ID}" }
-variable "os_user_name" { default = "${OS_USERNAME}" }
-variable "os_password" { default = "${OS_PASSWORD}" }
+variable "flavor" { default = "{{ FLAVOR }}" }
+variable "keypair_name" { default = "{{ KEYPAIR_NAME }}" }
+variable "os_network_name" { default = "{{ OS_NETWORK_NAME }}" }
+variable "os_region" { default = "{{ OS_REGION_NAME }}" }
+variable "os_auth_url" { default = "{{ OS_AUTH_URL }}" }
+variable "os_tenant_name" { default = "{{ OS_TENANT_NAME }}" }
+variable "os_tenant_id" { default = "{{ OS_TENANT_ID }}" }
+variable "os_user_name" { default = "{{ OS_USERNAME }}" }
+variable "os_password" { default = "{{ OS_PASSWORD }}" }

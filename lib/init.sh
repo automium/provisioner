@@ -3,7 +3,11 @@
 set -e
 set -o pipefail
 
-envsubst < config.tf.tmpl > config.tf
+j2 config.tf.tmpl > config.tf
+TEMPLATES=$(find providers -name "*.tmpl")
+for TEMPLATE in $TEMPLATES; do
+  j2 $TEMPLATE > "${TEMPLATE//.tmpl/}"
+done
 
 if [ "$DEBUG" == "true" ]; then
   cat config.tf
