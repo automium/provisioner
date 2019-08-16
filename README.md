@@ -14,7 +14,7 @@ TODO list the variables here
 if true the provisoiner waits until cleanup is done
 
 ### NETWORK_SECURITY_PORTS
-a list of ports or ranges e.g.
+a list of maximum 10 ports or ranges e.g.
 ```
 80,443,10000-20000
 ```
