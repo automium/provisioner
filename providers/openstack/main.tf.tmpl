@@ -1,41 +1,71 @@
-{%- set module_network_security_ports = [] -%}
-{%- if NETWORK_SECURITY_PORTS is defined and NETWORK_SECURITY_PORTS|length -%}
-{%- for network_security_port in NETWORK_SECURITY_PORTS.split(",") -%}
-{%- if "-" in network_security_port -%}
-{%- set port_range_min = network_security_port.split("-")[0] %}
-{% set port_range_max = network_security_port.split("-")[1] %}
-{%- else %}
-{%- set port_range_min = network_security_port %}
-{% set port_range_max = network_security_port %}
-{%- endif -%}
-{%- set module_tcp = IDENTITY ~ '_' ~ network_security_port ~ '_tcp' -%}
-{%- set module_udp = IDENTITY ~ '_' ~ network_security_port ~ '_udp' -%}
-{{- module_network_security_ports.append('\"${module.' ~ module_tcp ~ '.sg_id}\"') or "" }}
-{{- module_network_security_ports.append('\"${module.' ~ module_udp ~ '.sg_id}\"') or "" }}
-module "{{ module_tcp }}" {
-  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.7"
-  name = "{{ module_tcp }}"
+resource "openstack_networking_secgroup_v2" "per_host_securitygroups" {
+  name = "{{ IDENTITY }}-${count.index}"
+  description ="Created automatically - Security group for {{ IDENTITY }}-${count.index} instance"
+  delete_default_rules = true
   region = "${var.os_region}"
-  protocol = "tcp"
-  port_range_min = {{ port_range_min }}
-  port_range_max = {{ port_range_max }}
-  allow_remote = "0.0.0.0/0"
+  count = "${var.quantity}"
+
+  lifecycle {
+    ignore_changes = ["*"]
+  }
 }
 
-module "{{ module_udp }}" {
-  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.7"
-  name = "{{ module_udp }}"
-  region = "${var.os_region}"
-  protocol = "udp"
-  port_range_min = {{ port_range_min }}
-  port_range_max = {{ port_range_max }}
-  allow_remote = "0.0.0.0/0"
-}
-{%- endfor %}
+{%- if NETWORK_SECURITY_PORTS is defined and NETWORK_SECURITY_PORTS.split(",")|length -%}
+{%- set configured_rules = NETWORK_SECURITY_PORTS.split(",")|length -%}
+{% else %}
+{%- set configured_rules = 0 -%}
+{%- endif -%}
+{%- for n in range(10) -%}
+{% if configured_rules > 0 and configured_rules >= loop.index -%}
+{% set network_security_port = NETWORK_SECURITY_PORTS.split(",")[loop.index0] -%}
+{%- if "-" in network_security_port -%}
+{%- set port_range_min = network_security_port.split("-")[0] -%}
+{% set port_range_max = network_security_port.split("-")[1] -%}
+{% set remote_ip_prefix = "0.0.0.0/0" -%}
+{%- else %}
+{%- set port_range_min = network_security_port -%}
+{% set port_range_max = network_security_port -%}
+{% set remote_ip_prefix = "0.0.0.0/0" -%}
 {% endif %}
-{% if module_network_security_ports is defined and module_network_security_ports|length -%}
-{% set module_network_security_ports_string = "," ~ module_network_security_ports|join(",") -%}
-{% endif -%}
+{% else %}
+{%- set port_range_min = loop.index -%}
+{% set port_range_max = loop.index -%}
+{% set remote_ip_prefix = "127.0.0.1/32" -%}
+{% endif %}
+
+resource "openstack_networking_secgroup_rule_v2" "per_securitygroup_rules_tcp_{{ loop.index0 }}" {
+  region = "${var.os_region}"
+  direction = "ingress"
+  ethertype = "IPv4"
+  protocol = "tcp"
+  port_range_min = "{{ port_range_min }}"
+  port_range_max = "{{ port_range_max }}"
+  remote_ip_prefix = "{{ remote_ip_prefix }}"
+  security_group_id = "${openstack_networking_secgroup_v2.per_host_securitygroups.*.id[count.index]}"
+  count = "${var.quantity}"
+
+  lifecycle {
+    ignore_changes = ["*"]
+  }
+}
+
+resource "openstack_networking_secgroup_rule_v2" "per_securitygroup_rules_udp_{{ loop.index0 }}" {
+  region = "${var.os_region}"
+  direction = "ingress"
+  ethertype = "IPv4"
+  protocol = "udp"
+  port_range_min = "{{ port_range_min }}"
+  port_range_max = "{{ port_range_max }}"
+  remote_ip_prefix = "{{ remote_ip_prefix }}"
+  security_group_id = "${openstack_networking_secgroup_v2.per_host_securitygroups.*.id[count.index]}"
+  count = "${var.quantity}"
+
+  lifecycle {
+    ignore_changes = ["*"]
+  }
+}
+
+{%- endfor %}
 
 data "openstack_networking_network_v2" "network" {
   name = "${var.os_network_name}"
@@ -48,7 +78,7 @@ data "openstack_networking_subnet_v2" "subnet" {
 }
 
 module "internal" {
-  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.7"
+  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.8"
   name = "internal"
   region = "${var.os_region}"
   protocol = ""
@@ -56,7 +86,7 @@ module "internal" {
 }
 
 module "instance" {
-  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.7"
+  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.8"
   name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
   region = "${var.os_region}"
   image = "${var.image}"
@@ -64,7 +94,8 @@ module "instance" {
   discovery = "false"
   flavor = "${var.flavor}"
   network_name = "${var.os_network_name}"
-  sec_group = ["${module.internal.sg_id}"{{- module_network_security_ports_string|default() -}}]
+  sec_group_per_instance = "${openstack_networking_secgroup_v2.per_host_securitygroups.*.id}"
+  sec_group = ["${module.internal.sg_id}"]
   keypair = "${var.keypair_name}"
   allowed_address_pairs = "0.0.0.0/0"
   userdata = "${data.template_file.cloud-config.*.rendered}"
