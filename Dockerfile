@@ -46,6 +46,9 @@ RUN apt-get update && \
     apt-get install jq bc gettext-base -y && \
     pip install --user j2cli
 
+# debug
+RUN apt-get install vim -y
+
 ENV PATH=$PATH:/root/.local/bin/
 
 COPY . /usr/src/provisioner
