@@ -15,7 +15,7 @@ variable "provider" { default = "{{ PROVIDER }}" }
 # see project repo for more config to use
 
 variable "provisioner_role" { default = "{{ PROVISIONER_ROLE }}" }
-variable "provisioner_role_version" { default = "{{ PROVISIONER_ROLE_VERSION }}" }
+variable "provisioner_role_version" { default = "{{ PROVISIONER_ROLE_VERSION|default() }}" }
 
 # openstack config
 
