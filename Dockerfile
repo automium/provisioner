@@ -41,6 +41,9 @@ RUN curl -L $GOVC_LINK | gunzip > /usr/local/bin/govc && \
 RUN apt-get update && apt-get install python-pip -y && \
     pip install --user vcd-cli
 
+# sentry
+RUN curl -sL https://sentry.io/get-cli/ | bash
+
 # tools
 RUN apt-get update && \
     apt-get install jq bc gettext-base -y && \

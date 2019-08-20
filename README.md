@@ -19,6 +19,12 @@ a list of maximum 10 ports or ranges e.g.
 80,443,10000-20000
 ```
 
+### SENTRY_DSN
+DSN where to send log with sentry
+```
+https://<key>:<secret>@sentry.io/<project>
+```
+
 ## usage
 
 create a .env file, see [.env.example](https://raw.githubusercontent.com/automium/provisioner/master/.env.example) and download the composes

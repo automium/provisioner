@@ -6,6 +6,11 @@ traperr() {
 
 trap traperr ERR
 
+# Enable sentry log
+if [ "${SENTRY_DSN}" ]; then
+  eval "$(sentry-cli bash-hook | sed 's/: > "\$_SENTRY_LOG_FILE"//g' | sed 's/export SENTRY_LAST_EVENT/: > "\$_SENTRY_LOG_FILE"\n  export SENTRY_LAST_EVENT/g')"
+fi
+
 get_current_quantity() {
   set -e
   set -o pipefail
