@@ -35,7 +35,8 @@ RUN apt-get update && apt-get install parallel python-pip python3 -y && \
 # vsphere
 ENV GOVC_LINK=https://github.com/vmware/govmomi/releases/download/v0.20.0/govc_linux_amd64.gz
 RUN curl -L $GOVC_LINK | gunzip > /usr/local/bin/govc && \
-    chmod +x /usr/local/bin/govc
+    chmod +x /usr/local/bin/govc && \
+    apt update && apt-get install genisoimage -y
 
 # vcd
 RUN apt-get update && apt-get install python-pip -y && \

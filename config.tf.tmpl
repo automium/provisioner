@@ -28,3 +28,19 @@ variable "os_tenant_name" { default = "{{ OS_TENANT_NAME }}" }
 variable "os_tenant_id" { default = "{{ OS_TENANT_ID }}" }
 variable "os_user_name" { default = "{{ OS_USERNAME }}" }
 variable "os_password" { default = "{{ OS_PASSWORD }}" }
+
+# vsphere config
+
+variable "vsphere_user" { default = "{{ VSPHERE_USERNAME|default() }}" }
+variable "vsphere_password" { default = "{{ VSPHERE_PASSWORD|default() }}" }
+variable "vsphere_server" { default = "{{ VSPHERE_SERVER|default() }}" }
+variable "network_name" { default = "{{ NETWORK_NAME|default() }}" }
+variable "network_cidr" { default = "{{ NETWORK_CIDR|default() }}" }
+variable "cluster" { default = "{{ CLUSTER|default() }}" }
+variable "cpus" { default = "{{ CPUS|default() }}" }
+variable "datacenter" { default = "{{ DATACENTER|default() }}" }
+variable "datastore" { default = "{{ DATASTORE|default() }}" }
+variable "iso_datastore" { default = "{{ ISO_DATASTORE|default() }}" }
+variable "keypair" { default = "{{ KEYPAIR|default() }}" }
+variable "memory" { default = "{{ MEMORY|default() }}" }
+variable "template_datastore" { default = "{{ TEMPLATE_DATASTORE|default() }}" }
