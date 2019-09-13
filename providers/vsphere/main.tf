@@ -1,5 +1,5 @@
 module "instance" {
-  source = "github.com/automium/terraform-modules//vsphere/instance?ref=1.0.9"
+  source = "github.com/automium/terraform-modules//vsphere/instance?ref=1.0.10"
   name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
   quantity = "${var.quantity}"
   cpus = "${var.cpus}"
