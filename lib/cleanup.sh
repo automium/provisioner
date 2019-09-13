@@ -48,7 +48,7 @@ if [ "$quantity" = "0" ]; then
     exit 1
   fi
 
-  cluster_group_exists=$(echo $${cluster_group_kv} | jq '.[].Key' | egrep ".*/.*/.*" | grep -v /deploy/ | grep -v /cleanup/ | wc -l)
+  cluster_group_exists=$(echo $${cluster_group_kv} | jq '.[].Key' | egrep ".*/.*/.*" | grep -v "/\.deploy/" | grep -v "/\.cleanup/" | wc -l)
   if [ "$cluster_group_exists" = "0" ]; then
     echo "$(date +%x\ %H:%M:%S) Is the last group so clean up everything"
     # Remove cluster consul keys
