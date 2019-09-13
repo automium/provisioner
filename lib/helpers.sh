@@ -110,7 +110,7 @@ taint_node() {
   cd providers/$PROVIDER
   [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   # Taint resource in instance $NUMBER
-  terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
+  terraform state list | grep "\[${NUMBER}\]" | grep 'module\.instance' | grep -v 'module\.instance\.\(template_file\|null_resource\)' | while read item; do
     RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
     terraform taint -module=instance $RESOURCE.$NUMBER
   done
@@ -126,7 +126,7 @@ untaint_node() {
   cd providers/$PROVIDER
   [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   # Taint resource in instance $NUMBER
-  terraform state list | grep "\[${NUMBER}\]" | grep module.instance | while read item; do
+  terraform state list | grep "\[${NUMBER}\]" | grep 'module\.instance' | grep -v 'module\.instance\.\(template_file\|null_resource\)' | while read item; do
     RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
     terraform untaint -module=instance $RESOURCE.$NUMBER
   done
