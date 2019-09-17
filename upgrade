@@ -48,10 +48,10 @@ for n in $(seq 1 $QUANTITY_TAINT); do
 done
 
 # Decrease number to the orginal number
-echo "$(date +%x\ %H:%M:%S) [START] Decrease quantity to the orginal number $QUANTITY"
+echo "$(date +%x\ %H:%M:%S) [START] Decrease quantity to the orginal number $QUANTITY_CURRENT"
 QUANTITY_CURRENT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
 export QUANTITY_CURRENT
 source lib/sync.sh
-echo "$(date +%x\ %H:%M:%S) [END] Decrease quantity to the orginal number $QUANTITY"
+echo "$(date +%x\ %H:%M:%S) [END] Decrease quantity to the orginal number $QUANTITY_CURRENT"
 
 echo "$(date +%x\ %H:%M:%S) [END] Rolling upgrade"
