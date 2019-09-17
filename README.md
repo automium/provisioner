@@ -25,6 +25,20 @@ DSN where to send log with sentry
 https://<key>:<secret>@sentry.io/<project>
 ```
 
+### TELEGRAM_BOT_TOKEN _optional_
+require TELEGRAM_CHAT_ID
+used for send notification to telegram
+```
+125934871:AxFZ65hflxz9qEGI8zwS8p_hb2mxptGAm13
+```
+
+### TELEGRAM_CHAT_ID _optional_
+require TELEGRAM_BOT_TOKEN
+used for send notification to telegram
+```
+-127989562
+```
+
 ## usage
 
 create a .env file, see [.env.example](https://raw.githubusercontent.com/automium/provisioner/master/.env.example) and download the composes
