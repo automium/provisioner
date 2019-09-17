@@ -28,12 +28,14 @@ variable "os_tenant_id" { default = "{{ OS_TENANT_ID }}" }
 variable "os_user_name" { default = "{{ OS_USERNAME }}" }
 variable "os_password" { default = "{{ OS_PASSWORD }}" }
 {% if PROVIDER == "openstack" %}
+variable "context" { default = "{{ OS_USERNAME }}" }
 variable "flavor" { default = "{{ FLAVOR }}" }
 variable "keypair_name" { default = "{{ KEYPAIR_NAME }}" }
 
 {% elif PROVIDER == "vsphere" %}
 # vsphere config
 
+variable "context" { default = "{{ VSPHERE_USERNAME|default() }}" }
 variable "vsphere_user" { default = "{{ VSPHERE_USERNAME|default() }}" }
 variable "vsphere_password" { default = "{{ VSPHERE_PASSWORD|default() }}" }
 variable "vsphere_server" { default = "{{ VSPHERE_SERVER|default() }}" }
