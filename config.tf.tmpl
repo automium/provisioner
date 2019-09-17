@@ -12,6 +12,7 @@ variable "network_security_ports" { default = "{{ NETWORK_SECURITY_PORTS|default
 variable "provider" { default = "{{ PROVIDER }}" }
 
 # monitoring vars
+variable "sentry_dsn" { default = "{{ SENTRY_DSN }}"}
 variable "telegram_bot_token" { default = "{{ TELEGRAM_BOT_TOKEN }}"}
 variable "telegram_chat_id" { default = "{{ TELEGRAM_CHAT_ID }}"}
 
