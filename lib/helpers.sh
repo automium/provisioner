@@ -110,9 +110,16 @@ taint_node() {
   cd providers/$PROVIDER
   [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   # Taint resource in instance $NUMBER
-  terraform state list | grep "\[${NUMBER}\]" | grep 'module\.instance' | grep -v 'module\.instance\.template_file' | while read item; do
+  # when there is only one resource terraform doesn't print the [NUMBER]
+  # and becouse taint should be only when there is more than one node
+  # grep [NUMBER] ensure that we don't destroy the last standing node
+  terraform state list | grep "\[${NUMBER}\]" | grep "module\.instance\|per_host_securitygroups\[${NUMBER}\]$" | grep -v 'module\.instance\.template_file' | while read item; do
     RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
-    terraform taint -module=instance $RESOURCE.$NUMBER
+    if [[ $item =~ "module.instance" ]]; then
+      terraform taint -module=instance $RESOURCE.$NUMBER
+    else
+      terraform taint $RESOURCE.$NUMBER
+    fi
   done
   cd ../..
 }
@@ -126,9 +133,16 @@ untaint_node() {
   cd providers/$PROVIDER
   [ -L .terraform ] || ln -s ../../.terraform . > /dev/null
   # Taint resource in instance $NUMBER
-  terraform state list | grep "\[${NUMBER}\]" | grep 'module\.instance' | grep -v 'module\.instance\.template_file' | while read item; do
+  # when there is only one resource terraform doesn't print the [NUMBER]
+  # and becouse taint should be only when there is more than one node
+  # grep [NUMBER] ensure that we don't destroy the last standing node
+  terraform state list | grep "\[${NUMBER}\]" | grep "module\.instance\|per_host_securitygroups\[${NUMBER}\]$" | grep -v 'module\.instance\.template_file' | while read item; do
     RESOURCE=$(echo $item | sed 's/module\.instance\.//'| sed "s/\[${NUMBER}\]//")
-    terraform untaint -module=instance $RESOURCE.$NUMBER
+    if [[ $item =~ "module.instance" ]]; then
+      terraform untaint -module=instance $RESOURCE.$NUMBER
+    else
+      terraform untaint $RESOURCE.$NUMBER
+    fi
   done
   cd ../..
 }
