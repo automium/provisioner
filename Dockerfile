@@ -59,4 +59,7 @@ COPY . /usr/src/provisioner
 
 WORKDIR /usr/src/provisioner
 
+ENV PROVISIONER_CONFIG_WAIT_CLEANUP false
+ENV PROVISIONER_CONFIG_WAIT_CLEANUP_TIMEOUT 30
+
 CMD ["./deploy"]

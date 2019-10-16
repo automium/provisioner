@@ -18,7 +18,7 @@ for DESTROY_NUMBER in $DESTROY_NUMBERS; do
   echo "$(date +%x\ %H:%M:%S) [START] Destroy instance ${IDENTITY}-${DESTROY_NUMBER}"
 
   if [ "${PROVISIONER_CONFIG_WAIT_CLEANUP}" == "true" ]; then
-    TIMEOUT=30
+    TIMEOUT=${PROVISIONER_CONFIG_WAIT_CLEANUP_TIMEOUT}
     COUNT=0
     echo "$(date +%x\ %H:%M:%S) [START] Cleanup tasks on node ${IDENTITY}-${DESTROY_NUMBER}"
     while [ "$(curl -sS http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/.cleanup/${IDENTITY}-${DESTROY_NUMBER}/ongoing)" ]; do
