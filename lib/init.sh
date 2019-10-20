@@ -12,6 +12,9 @@ else
   export IDENTITY
 fi
 
+echo "$(date +%x\ %H:%M:%S) Check if consul is available or exit"
+curl -sf "http://${CONSUL}:${CONSUL_PORT}/v1/health/service/consul?passing"
+
 j2 config.tf.tmpl > config.tf
 TEMPLATES=$(find providers -name "*.tmpl")
 for TEMPLATE in $TEMPLATES; do

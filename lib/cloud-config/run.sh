@@ -53,6 +53,12 @@ cat << EOG > provisioner_requirement.yml
   name: provisioner
 EOG
 
+echo "check if consul is available"
+until curl -sf "http://$${consul}:$${consul_port}/v1/health/service/consul?passing"; do
+  echo FAIL, retry to reach consul
+  sleep 10
+done
+
 run_bootstrap() {
   # Get bootstrap node
   consul_path=$${1}
