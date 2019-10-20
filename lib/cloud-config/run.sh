@@ -63,7 +63,13 @@ run_bootstrap() {
   export provisioner_role_enabled
   bootstrap_session=$(curl -s -X PUT "http://$${consul}:$${consul_port}/v1/session/create" | jq .ID | sed 's/"//g')
   export bootstrap_session
-  bootstrap=$(curl -s -X PUT --data "{ \"name\": \"$${identity}-$${number}\" }" "http://$${consul}:$${consul_port}/v1/kv/$${consul_path}/custom_bootstrap?acquire=$${bootstrap_session}")
+
+  curl -f http://$${consul}:$${consul_port}/v1/kv/$${consul_path}/custom_bootstrap
+  if [ $? -eq 22 ]; then
+    bootstrap=$(curl -s -X PUT --data "{ \"name\": \"$${identity}\" }" "http://$${consul}:$${consul_port}/v1/kv/$${consul_path}/custom_bootstrap?acquire=$${bootstrap_session}")
+  else
+    bootstrap=false
+  fi
   export bootstrap
 
   if [ "$bootstrap" == "true" ]; then
