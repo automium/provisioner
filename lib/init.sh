@@ -13,7 +13,7 @@ else
 fi
 
 echo "$(date +%x\ %H:%M:%S) Check if consul is available or exit"
-curl -sf "http://${CONSUL}:${CONSUL_PORT}/v1/health/service/consul?passing"
+curl -sSf "http://${CONSUL}:${CONSUL_PORT}/v1/health/service/consul?passing" > /dev/null
 
 j2 config.tf.tmpl > config.tf
 TEMPLATES=$(find providers -name "*.tmpl")
