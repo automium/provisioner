@@ -44,6 +44,13 @@ used for send notification to telegram
 -127989562
 ```
 
+### AVAILABILITY_ZONES
+in which availability zones the provisioner will spread the instances in a round robin fashion
+the zones must be comma delimited
+```
+"north_city","south_city"
+```
+
 ## usage
 
 create a .env file, see [.env.example](https://raw.githubusercontent.com/automium/provisioner/master/.env.example) and download the composes
