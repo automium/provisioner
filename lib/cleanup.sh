@@ -11,7 +11,7 @@ cat << EOC | json2hcl -reverse | python3 -c '
 import sys, json
 for i in json.load(sys.stdin)["variable"]:
   for key, value in i.items():
-    print("export " + key + "=\"" + i[key][0]["default"] + "\"")
+    print("export " + key + "=\"" + str(i[key][0]["default"]) + "\"")
 '
 ${config}
 EOC

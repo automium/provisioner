@@ -78,7 +78,7 @@ data "openstack_networking_subnet_v2" "subnet" {
 }
 
 module "internal" {
-  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.10"
+  source = "github.com/automium/terraform-modules//openstack/security?ref=1.0.14"
   name = "internal"
   region = "${var.os_region}"
   protocol = ""
@@ -86,9 +86,10 @@ module "internal" {
 }
 
 module "instance" {
-  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.10"
+  source = "github.com/automium/terraform-modules//openstack/instance?ref=1.0.14"
   name = "${var.cluster_name == "" ? "${var.name}" : "${var.cluster_name}-${var.name}"}"
   region = "${var.os_region}"
+  availability_zones = "${var.availability_zones}"
   image = "${var.image}"
   quantity = "${var.quantity}"
   discovery = "false"
