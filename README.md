@@ -4,57 +4,109 @@
 
 deploy ansible role in a distribuite manner on your favorite terraform provider
 
-the automium provisioner take care for two special tags for bootstrap your cluster
-
 ## variables
 
-TODO list the variables here
+### common
 
-### PROVISIONER_CONFIG_WAIT_CLEANUP
+variables used generically for every provider  
+</br>
+
+#### PROVISIONER_CONFIG_WAIT_CLEANUP
+
 if true the provisoiner waits until cleanup is done
 
-### PROVISIONER_CONFIG_WAIT_CLEANUP_TIMEOUT
+#### PROVISIONER_CONFIG_WAIT_CLEANUP_TIMEOUT
+
 number of retry before timeout. Waiting time between one
 retry and another is 1s.
 _Default 30_
 
-### NETWORK_SECURITY_PORTS
-a list of maximum 10 ports or ranges e.g.
-```
-80,443,10000-20000
-```
+#### SENTRY_DSN
 
-### SENTRY_DSN
 DSN where to send log with sentry
 ```
 https://<key>:<secret>@sentry.io/<project>
 ```
 
-### TELEGRAM_BOT_TOKEN _optional_
+#### TELEGRAM_BOT_TOKEN _optional_
+
 require TELEGRAM_CHAT_ID
 used for send notification to telegram
 ```
 125934871:AxFZ65hflxz9qEGI8zwS8p_hb2mxptGAm13
 ```
 
-### TELEGRAM_CHAT_ID _optional_
+#### TELEGRAM_CHAT_ID _optional_
+
 require TELEGRAM_BOT_TOKEN
 used for send notification to telegram
 ```
 -127989562
 ```
 
-### AVAILABILITY_ZONES
+#### AVAILABILITY_ZONES
+_doesn't work on vsphere and vcd_
+
 in which availability zones the provisioner will spread the instances in a round robin fashion
 the zones must be comma delimited
 ```
 "north_city","south_city"
 ```
 
+#### NETWORK_SECURITY_PORTS
+_doesn't work on vsphere and vcd_
+
+a list of maximum 10 ports or ranges e.g.
+```
+80,443,10000-20000
+```
+
+#### FLAVOR
+
+deploy instances with provider exposed flavors.  
+
+On vsphere or vcd does not exist so an abstraction is used instead.
+Separeted by a minus the first field is the number of CPUs and the second
+is the MB of memory.
+```
+4-8192 # is 4 CPUs and 8GB of memory.
+```
+
+### openstack
+
+provider specific variables for openstack
+```
+KEYPAIR_NAME=
+OS_NETWORK_NAME=
+FLAVOR=1.standard.1
+OS_REGION_NAME=
+OS_AUTH_URL=
+OS_TENANT_NAME=
+OS_TENANT_ID=
+OS_USERNAME=
+OS_PASSWORD=
+```
+
+### vsphere
+
+provider specific variables for vsphere
+```
+VSPHERE_USERNAME=
+VSPHERE_PASSWORD=
+VSPHERE_SERVER=
+NETWORK_NAME=
+CLUSTER=
+FLAVOR=4-8192
+DATACENTER=
+DATASTORE=
+ISO_DATASTORE=
+KEYPAIR= # Public ssh key
+TEMPLATE_DATASTORE=
+```
+
 ## usage
 
 create a .env file, see [.env.example](https://raw.githubusercontent.com/automium/provisioner/master/.env.example) and download the composes
-
 ```
 curl -Ss https://raw.githubusercontent.com/automium/provisioner/master/docker-compose.yml > docker-compose.yml
 ```
@@ -76,7 +128,6 @@ docker-compose run --rm upgrade
 ### apply
 
 call terraform apply directly without waiting readiness
-
 ```
 docker-compose pull
 docker-compose run --rm apply
@@ -85,7 +136,6 @@ docker-compose run --rm apply
 ## contribute
 
 download the repo and make your changes
-
 ```
 git clone https://github.com/automium/provisioner.git
 cd provisioner
@@ -101,7 +151,7 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --rm deploy
 
 ## tags
 
-TODO better explain the tags workflow
+the automium provisioner take care for two special tags for bootstrap your cluster
 
 ### bootstrap
 
