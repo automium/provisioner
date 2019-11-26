@@ -18,7 +18,7 @@ COPY --from=build-env /go/bin/tfjson /usr/local/bin/tfjson
 # terraform
 ENV TERRAFORM_VERSION=0.11.13
 RUN apt-get update && \
-    apt-get install curl unzip git -y && \
+    apt-get install curl wget unzip git -y && \
     curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform.zip && \
     unzip terraform.zip -d /usr/local/bin/ && \
     chmod +x /usr/local/bin/terraform
@@ -32,6 +32,10 @@ RUN apt-get update && apt-get install parallel python-pip python3 -y && \
     python -m pip install --upgrade pip && \
     pip install --user python-swiftclient==3.6.0 python-openstackclient==3.17.0
 
+# xq
+RUN apt-get update && apt-get install python3-pip -y && \
+    pip3 install --user yq==2.9.2
+
 # vsphere
 ENV GOVC_LINK=https://github.com/vmware/govmomi/releases/download/v0.20.0/govc_linux_amd64.gz
 RUN curl -L $GOVC_LINK | gunzip > /usr/local/bin/govc && \
@@ -39,8 +43,8 @@ RUN curl -L $GOVC_LINK | gunzip > /usr/local/bin/govc && \
     apt update && apt-get install genisoimage -y
 
 # vcd
-RUN apt-get update && apt-get install python-pip -y && \
-    pip install --user vcd-cli
+RUN apt-get update && apt-get install python3-pip -y && \
+    pip3 install --user vcd-cli==22.0.0
 
 # sentry
 RUN curl -sL https://sentry.io/get-cli/ | bash
@@ -59,6 +63,7 @@ COPY . /usr/src/provisioner
 
 WORKDIR /usr/src/provisioner
 
+ENV LC_ALL C.UTF-8
 ENV PROVISIONER_CONFIG_WAIT_CLEANUP false
 ENV PROVISIONER_CONFIG_WAIT_CLEANUP_TIMEOUT 30
 
