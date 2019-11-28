@@ -66,10 +66,12 @@ a list of maximum 10 ports or ranges e.g.
 deploy instances with provider exposed flavors.  
 
 On vsphere or vcd does not exist so an abstraction is used instead.
-Separeted by a minus the first field is the number of CPUs and the second
-is the MB of memory.
+Separeted by a minus
+- the first field is the number of CPUs
+- the second are the MB of memory.
+- the thirth are the MB of OS disk.
 ```
-4-8192 # is 4 CPUs and 8GB of memory.
+4-8192-102400 # is 4 CPUs, 8GB of memory and 102400MB of disk
 ```
 
 ### openstack
@@ -96,12 +98,29 @@ VSPHERE_PASSWORD=
 VSPHERE_SERVER=
 NETWORK_NAME=
 CLUSTER=
-FLAVOR=4-8192
+FLAVOR=4-8192-102400
 DATACENTER=
 DATASTORE=
 ISO_DATASTORE=
 KEYPAIR= # Public ssh key
 TEMPLATE_DATASTORE=
+```
+
+### vcd
+
+provider specific variables for vcd
+```
+VCD_CATALOG=
+VCD_ORG=
+VCD_PASSWORD=
+VCD_SERVER=
+VCD_URL=
+VCD_USERNAME=
+VCD_VDC=
+FLAVOR=4-8192-102400
+NETWORK_CIDR=
+NETWORK_NAME=
+KEYPAIR= # Public ssh key
 ```
 
 ## usage

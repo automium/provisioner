@@ -15,6 +15,8 @@ if [ "$PROVIDER" == "openstack" ]; then
   INSTANCE_ALIAS=openstack_compute_instance_v2
 elif [ "$PROVIDER" == "vsphere" ]; then
   INSTANCE_ALIAS=vsphere_virtual_machine.instance
+elif [ "$PROVIDER" == "vcd" ]; then
+  INSTANCE_ALIAS=vcd_vapp_vm
 else
   >&2 echo "$(date +%x\ %H:%M:%S) No provider configured"
   false

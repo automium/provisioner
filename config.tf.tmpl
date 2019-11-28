@@ -51,15 +51,34 @@ variable "network_name" { default = "{{ NETWORK_NAME|default() }}" }
 variable "cluster" { default = "{{ CLUSTER|default() }}" }
 variable "flavor" { default = "{{ FLAVOR }}" }
 variable "cpus" { default = "{{ CPUS|default(FLAVOR.split("-")[0]) }}" }
+variable "memory" { default = "{{ MEMORY|default(FLAVOR.split("-")[1]) }}" }
+variable "disk" { default = "{{ DISK|default(FLAVOR.split("-")[2]) }}" }
 variable "datacenter" { default = "{{ DATACENTER|default() }}" }
 variable "datastore" { default = "{{ DATASTORE|default() }}" }
 variable "iso_datastore" { default = "{{ ISO_DATASTORE|default() }}" }
 variable "keypair" { default = "{{ KEYPAIR|default() }}" }
-variable "memory" { default = "{{ MEMORY|default(FLAVOR.split("-")[1]) }}" }
 variable "template_datastore" { default = "{{ TEMPLATE_DATASTORE|default() }}" }
 variable "root_folder" { default = "{{ FOLDER|default("automium") }}" }
 variable "folder" { default = "{{ FOLDER|default(CLUSTER_NAME) }}" }
 variable "vsphere_scsi_controller_type" { default = "{{ VSPHERE_SCSI_CONTROLLER_TYPE|default("pvscsi") }}" }
 variable "vsphere_resource_pool" { default = "{{ VSPHERE_RESOURCE_POOL|default("pvscsi") }}" }
 
+{% elif PROVIDER == "vcd" %}
+# vcd config
+
+variable "context" { default = "{{ VCD_ORG|default() }}" }
+variable "keypair" { default = "{{ KEYPAIR }}" }
+variable "flavor" { default = "{{ FLAVOR }}" }
+variable "cpus" { default = "{{ CPUS|default(FLAVOR.split("-")[0]) }}" }
+variable "memory" { default = "{{ MEMORY|default(FLAVOR.split("-")[1]) }}" }
+variable "disk" { default = "{{ DISK|default(FLAVOR.split("-")[2]) }}" }
+variable "vcd_catalog" { default = "{{ VCD_CATALOG|default("automium") }}" }
+variable "vcd_org" { default = "{{ VCD_ORG }}" }
+variable "vcd_password" { default = "{{ VCD_PASSWORD }}" }
+variable "vcd_server" { default = "{{ VCD_SERVER }}" }
+variable "vcd_url" { default = "{{ VCD_URL }}" }
+variable "vcd_username" { default = "{{ VCD_USERNAME }}" }
+variable "vcd_vdc" { default = "{{ VCD_VDC }}" }
+variable "keypair_name" { default = "{{ KEYPAIR_NAME }}" }
+variable "network_name" { default = "{{ NETWORK_NAME }}" }
 {% endif %}
