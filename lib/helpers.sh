@@ -47,6 +47,7 @@ get_health_issues() {
     echo get_health_issues: no check found
   fi
   CHECK_NUMBER=$(echo $OUTPUT | jq length)
+  if [ -z "$CHECK_NUMBER" ] || ! [[ "$CHECK_NUMBER" =~ ^[0-9]+$ ]]; then CHECK_NUMBER=0; fi
   if [ $CHECK_NUMBER -lt 2 ]; then
     echo get_health_issues: need a minimum of 2 checks
   fi
