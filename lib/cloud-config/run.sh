@@ -95,9 +95,9 @@ run_bootstrap() {
       export HOME
       ansible-galaxy install -r provisioner_requirement.yml
       if [ $bootstrap == "true" ]; then
-        ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags others --extra-vars="$${config_json}" | logger -s -n automium-agent.node.automium.consul -P 30514
+        ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags "others,image" --extra-vars="$${config_json}"
       else
-        ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags bootstrap --extra-vars="$${config_json}" | logger -s -n automium-agent.node.automium.consul -P 30514
+        ansible-playbook -e ansible_python_interpreter=/usr/bin/python --connection=local playbook.yml --skip-tags "bootstrap,image" --extra-vars="$${config_json}"
       fi
     ) >> /var/log/cloud-scripts.log 2>&1
     if [ $? == 0 ]; then
