@@ -11,4 +11,4 @@ if [ -z "$QUANTITY_CURRENT" ]; then
 fi
 
 terraform destroy -auto-approve providers/$PROVIDER
-swift --os-auth-url https://api.entercloudsuite.com/v2.0 --os-tenant-name $OS_TENANT_NAME --os-username $OS_USERNAME --os-password $OS_PASSWORD delete ${PROVIDER}-${IDENTITY} > /dev/null
+swift --os-auth-url $OS_AUTH_URL --os-tenant-name $OS_TENANT_NAME --os-username $OS_USERNAME --os-password $OS_PASSWORD delete ${PROVIDER}-${IDENTITY} > /dev/null
