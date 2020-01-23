@@ -61,6 +61,12 @@ a list of maximum 10 ports or ranges e.g.
 80,443,10000-20000
 ```
 
+#### SERVER_GROUP_POLICY
+
+_openstack_ (default: "anti-affinity")  
+
+must be one of "affinity" or "anti-affinity"
+
 #### FLAVOR
 
 deploy instances with provider exposed flavors.  

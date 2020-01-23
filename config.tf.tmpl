@@ -33,6 +33,7 @@ variable "os_tenant_id" { default = "{{ OS_TENANT_ID }}" }
 variable "os_user_name" { default = "{{ OS_USERNAME }}" }
 variable "os_password" { default = "{{ OS_PASSWORD }}" }
 {% if PROVIDER == "openstack" %}
+variable "server_group_policy" { default = "{{ SERVER_GROUP_POLICY|default("anti-affinity") }}"}
 variable "availability_zones" { default = [{{ AVAILABILITY_ZONES|default("\"nova\"") }}]}
 variable "context" { default = "{{ OS_USERNAME }}" }
 variable "flavor" { default = "{{ FLAVOR }}" }
