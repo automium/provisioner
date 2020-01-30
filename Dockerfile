@@ -44,7 +44,7 @@ RUN curl -L $GOVC_LINK | gunzip > /usr/local/bin/govc && \
 
 # vcd
 RUN apt-get update && apt-get install python3-pip -y && \
-    pip3 install --user vcd-cli==22.0.0
+    pip3 install --user vcd-cli==22.0.0 pyvcloud==21.0.1.dev3
 
 # sentry
 RUN curl -sL https://sentry.io/get-cli/ | bash
