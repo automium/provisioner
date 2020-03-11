@@ -41,7 +41,7 @@ export number
 if [ ! "$provisioner_role_version" ]; then
   provisioner_role_version=$${image}
   export provisioner_role_version
-  config_json=$(echo -n $${config_json} | jq -c ".provisioner_role_version = \"$${image}\"")
+  config_json=$(echo -n "$${config_json}" | jq -c ".provisioner_role_version = \"$${image}\"")
   export config_json
 fi
 
