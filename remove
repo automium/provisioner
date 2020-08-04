@@ -8,6 +8,9 @@ if [ "$DEBUG" = "true" ]; then
   set -x
 fi
 
+# Cleanup sequentially
+source deploy
+
 # Import basic functions
 source lib/helpers.sh
 source lib/init.sh
