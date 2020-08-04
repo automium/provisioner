@@ -51,7 +51,7 @@ RUN curl -sL https://sentry.io/get-cli/ | bash
 # tools
 RUN apt-get update && \
     apt-get install jq bc gettext-base -y && \
-    pip install --user j2cli
+    pip3 install --user j2cli
 
 # debug
 RUN apt-get install vim -y
