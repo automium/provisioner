@@ -1,13 +1,9 @@
 FROM golang AS build-env
 RUN go get github.com/palantir/tfjson && \
     cd $GOPATH/src/github.com/palantir/tfjson && \
-    rm -rf vendor && \
-    go get -v ./... && \
-    sed -i 's/t\.Helper/\/\/t\.Helper/g' ../../hashicorp/terraform/config/testing.go && \
-    cd $GOPATH/src/github.com/hashicorp/terraform && \
-    git checkout v0.11 && \
-    cd $GOPATH/src/github.com/palantir/tfjson && \
-    go get -v ./... && \
+    rm -rf vendor/github.com/hashicorp/terraform && \
+    git clone -b v0.11 --depth 1 https://github.com/hashicorp/terraform vendor/github.com/hashicorp/terraform && \
+    sed -i 's/t\.Helper/\/\/t\.Helper/g' vendor/github.com/hashicorp/terraform/config/testing.go && \
     go install ./...
 
 FROM ubuntu:18.04
