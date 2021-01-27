@@ -42,6 +42,8 @@ get_health_issues() {
   set -e
   set -o pipefail
 
+  [ "$CONSUL_SERVICES_CHECK_NUMBER" ] || CONSUL_SERVICES_CHECK_NUMBER=2
+
   OUTPUT=$(curl -Ss ${CONSUL}:${CONSUL_PORT}/v1/health/node/${1})
   if [ -z "$OUTPUT" ]; then
     echo get_health_issues: no check found
@@ -51,8 +53,8 @@ get_health_issues() {
 
   CHECK_NUMBER=$(echo $OUTPUT | jq length 2>/dev/null)
   if [ -z "$CHECK_NUMBER" ] || ! [[ "$CHECK_NUMBER" =~ ^[0-9]+$ ]]; then CHECK_NUMBER=0; fi
-  if [ $CHECK_NUMBER -lt 2 ]; then
-    echo get_health_issues: need a minimum of 2 checks
+  if [ $CHECK_NUMBER -lt $CONSUL_SERVICES_CHECK_NUMBER ]; then
+    echo get_health_issues: need a minimum of $CONSUL_SERVICES_CHECK_NUMBER checks
   fi
   echo $OUTPUT | jq ".[] | select(.Status!=\"passing\")" 2>/dev/null
 }

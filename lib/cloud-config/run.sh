@@ -49,7 +49,7 @@ fi
 cd /usr/src/cloud
 cat << EOG > provisioner_requirement.yml
 - src: git+https://github.com/automium/ansible-provisioner.git
-  version: master
+  version: 1.0.0
   name: provisioner
 EOG
 

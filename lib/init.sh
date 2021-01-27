@@ -3,6 +3,9 @@
 set -e
 set -o pipefail
 
+# Import provisoiner config from the service
+source provisioner.sh
+
 # Get the id of the instance
 if [ "$CLUSTER_NAME" ]; then
   IDENTITY=${CLUSTER_NAME}-${NAME}

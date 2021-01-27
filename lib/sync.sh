@@ -37,6 +37,8 @@ done
 CREATE_NUMBERS=$(get_create_nodes)
 for CREATE_NUMBER in $CREATE_NUMBERS; do
   echo "$(date +%x\ %H:%M:%S) [START] Create instance ${IDENTITY}-${CREATE_NUMBER}"
+
+  curl -sS -X PUT http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/.create/${IDENTITY}-${CREATE_NUMBER}/ongoing -d "{ \"name\": \"${IDENTITY}-${CREATE_NUMBER}\", \"time\": \"$(date +%s)\" }" > /dev/null
 done
 
 source lib/apply.sh
@@ -52,6 +54,12 @@ done
 for CREATE_NUMBER in $CREATE_NUMBERS; do
   echo "$(date +%x\ %H:%M:%S) [START] Wait instance ${IDENTITY}-${CREATE_NUMBER}"
   wait_health_ok ${IDENTITY}-${CREATE_NUMBER}
+
+  while [ "$(curl -sS http://${CONSUL}:${CONSUL_PORT}/v1/kv/${CLUSTER_NAME}/.create/${IDENTITY}-${CREATE_NUMBER}/ongoing)" ]; do
+    echo "$(date +%x\ %H:%M:%S) Wait until all creating tasks finish on node ${IDENTITY}-${CREATE_NUMBER}"
+    sleep 10
+  done
+
   echo "$(date +%x\ %H:%M:%S) [END] Wait instance ${IDENTITY}-${CREATE_NUMBER}"
   echo "$(date +%x\ %H:%M:%S) [END] Create instance ${IDENTITY}-${CREATE_NUMBER}"
 done
