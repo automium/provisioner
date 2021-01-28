@@ -33,7 +33,7 @@ echo "$(date +%x\ %H:%M:%S) [START] Wait until all the cluster status is fine"
 QUANTITY_TAINT=$(echo "${QUANTITY_CURRENT} - 1" | bc)
 for n in $(seq 1 $QUANTITY_TAINT); do
   NUMBER=$(echo "$n - 1" | bc)
-  wait_health_ok $IDENTITY-$NUMBER
+  wait_health_ok $IDENTITY-$NUMBER 2
 done
 echo "$(date +%x\ %H:%M:%S) [END] Wait until all the cluster status is fine"
 
