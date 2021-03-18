@@ -1,4 +1,4 @@
-FROM golang AS build-env
+FROM golang:1.15.10 AS build-env
 RUN go get github.com/palantir/tfjson && \
     cd $GOPATH/src/github.com/palantir/tfjson && \
     rm -rf vendor/github.com/hashicorp/terraform && \
