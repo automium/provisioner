@@ -12,7 +12,7 @@ FROM ubuntu:18.04
 COPY --from=build-env /go/bin/tfjson /usr/local/bin/tfjson
 
 # terraform
-ENV TERRAFORM_VERSION=0.11.13
+ENV TERRAFORM_VERSION=0.11.15
 RUN apt-get update && \
     apt-get install curl wget unzip git -y && \
     curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform.zip && \
